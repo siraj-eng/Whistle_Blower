@@ -1,0 +1,518 @@
+{% extends "base.html" %}
+
+{% block title %}View Report - Admin Dashboard{% endblock %}
+
+{% block content %}
+<style>
+  /* Enhanced Report View Styles */
+  .report-view-container {
+    padding: 2rem;
+    background-color: #f8fafc;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .report-header {
+    background: linear-gradient(135deg, #14b8a6 0%, #2dd4bf 100%);
+    color: white;
+    padding: 1.5rem 2rem;
+    margin-bottom: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .report-header::before {
+    content: "";
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 100%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    transform: rotate(30deg);
+  }
+  
+  .report-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    position: relative;
+  }
+  
+  .tracking-code {
+    font-family: 'Courier New', monospace;
+    background: rgba(255,255,255,0.15);
+    padding: 0.25rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+  }
+  
+  .report-card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+    transition: all 0.2s ease;
+  }
+  
+  .report-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+  }
+  
+  .report-card-header {
+    padding: 1.25rem 1.5rem;
+    background: #f1f5f9;
+    border-bottom: 1px solid #e2e8f0;
+    font-weight: 600;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.1rem;
+  }
+  
+  .report-card-header i {
+    font-size: 1.1em;
+    color: #2dd4bf;
+  }
+  
+  .report-card-body {
+    padding: 1.5rem;
+  }
+  
+  .metadata-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .metadata-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .metadata-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .metadata-value {
+    font-size: 1rem;
+    color: #0f172a;
+    font-weight: 500;
+  }
+  
+  .description-content {
+    background: #f8fafc;
+    padding: 1.25rem;
+    border-radius: 8px;
+    border-left: 4px solid #2dd4bf;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: #334155;
+  }
+  
+  .status-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .status-pending {
+    background: #fef3c7;
+    color: #92400e;
+  }
+  
+  .status-in-progress {
+    background: #dbeafe;
+    color: #1e40af;
+  }
+  
+  .status-resolved {
+    background: #d1fae5;
+    color: #065f46;
+  }
+  
+  .comments-section {
+    margin-top: 2rem;
+  }
+  
+  .comment-item {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .comment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+  }
+  
+  .comment-author {
+    font-weight: 600;
+    color: #0f172a;
+  }
+  
+  .comment-date {
+    font-size: 0.85rem;
+    color: #64748b;
+  }
+  
+  .comment-content {
+    color: #334155;
+    line-height: 1.5;
+  }
+  
+  .comment-form {
+    background: #f8fafc;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+  }
+  
+  .comment-textarea {
+    min-height: 120px;
+    resize: vertical;
+    background: white;
+    border: 1px solid #e2e8f0;
+  }
+  
+  .action-buttons {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+  
+  .action-button {
+    flex: 1;
+    min-width: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+  }
+  
+  .action-button:hover {
+    transform: translateY(-1px);
+  }
+  
+  .empty-state {
+    text-align: center;
+    padding: 2rem;
+    background: #f1f5f9;
+    border-radius: 8px;
+  }
+  
+  .empty-icon {
+    font-size: 3rem;
+    color: #64748b;
+    margin-bottom: 1rem;
+    opacity: 0.3;
+  }
+  
+  .empty-text {
+    color: #334155;
+    font-size: 0.95rem;
+  }
+  
+  /* Mobile Responsive */
+  @media (max-width: 768px) {
+    .report-view-container {
+      padding: 1rem;
+    }
+    
+    .report-header {
+      padding: 1rem 1.5rem;
+    }
+    
+    .report-title {
+      font-size: 1.5rem;
+    }
+    
+    .metadata-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .action-buttons {
+      flex-direction: column;
+    }
+    
+    .report-card-header {
+      padding: 1rem 1.25rem;
+    }
+  }
+</style>
+
+<div class="report-view-container">
+  <!-- Report Header -->
+  <div class="report-header">
+    <div class="d-flex justify-content-between align-items-start">
+      <div>
+        <h1 class="report-title">
+          <i class="fas fa-file-alt"></i>
+          Report Details
+          <span class="tracking-code">{{ report[1][:2] }}****{{ report[1][-2:] }}</span>
+        </h1>
+        <p class="mb-0 text-white-80">Detailed view of the reported issue</p>
+      </div>
+      <div class="d-flex gap-2">
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-light">
+          <i class="fas fa-arrow-left me-2"></i> Back to Dashboard
+        </a>
+      </div>
+    </div>
+  </div>
+  
+  <div class="row">
+    <!-- Main Content Column -->
+    <div class="col-lg-8">
+      <!-- Report Details Card -->
+      <div class="report-card">
+        <div class="report-card-header">
+          <i class="fas fa-info-circle"></i>
+          <span>Report Information</span>
+        </div>
+        <div class="report-card-body">
+          <h3 class="mb-3">{{ report[2] }}</h3>
+          
+          <div class="metadata-grid">
+            <div class="metadata-item">
+              <span class="metadata-label">Category</span>
+              <span class="metadata-value">{{ report[4] }}</span>
+            </div>
+            <div class="metadata-item">
+              <span class="metadata-label">Priority</span>
+              <span class="status-badge status-{{ report[5]|lower|replace(' ', '-') }}">
+                {{ report[5] }}
+              </span>
+            </div>
+            <div class="metadata-item">
+              <span class="metadata-label">Date of Incident</span>
+              <span class="metadata-value">{{ report[9] }}</span>
+            </div>
+            <div class="metadata-item">
+              <span class="metadata-label">Location</span>
+              <span class="metadata-value">{{ report[10] }}</span>
+            </div>
+            <div class="metadata-item">
+              <span class="metadata-label">Department</span>
+              <span class="metadata-value">{{ report[11] }}</span>
+            </div>
+            <div class="metadata-item">
+              <span class="metadata-label">Status</span>
+              <span class="status-badge status-{{ report[6]|lower|replace(' ', '-') }}">
+                {{ report[6] }}
+              </span>
+            </div>
+          </div>
+          
+          <div class="metadata-item">
+            <span class="metadata-label">Description</span>
+            <div class="description-content">
+              {{ report[3]|nl2br|safe }}
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Comments Section -->
+      <div class="comments-section">
+        <div class="report-card">
+          <div class="report-card-header">
+            <i class="fas fa-comments"></i>
+            <span>Comments & Updates</span>
+          </div>
+          <div class="report-card-body">
+            {% if comments %}
+              {% for comment in comments %}
+                <div class="comment-item">
+                  <div class="comment-header">
+                    <span class="comment-author">
+                      {% if comment[4] %}
+                        <i class="fas fa-user-shield me-2"></i>Admin
+                      {% else %}
+                        <i class="fas fa-user me-2"></i>Reporter
+                      {% endif %}
+                    </span>
+                    <span class="comment-date">{{ comment[3] }}</span>
+                  </div>
+                  <div class="comment-content">
+                    {{ comment[2]|nl2br|safe }}
+                  </div>
+                </div>
+              {% endfor %}
+            {% else %}
+              <div class="empty-state">
+                <div class="empty-icon">
+                  <i class="fas fa-comments"></i>
+                </div>
+                <div class="empty-text">No comments yet</div>
+              </div>
+            {% endif %}
+            
+            <!-- Add Comment Form -->
+            <div class="comment-form mt-4">
+              <h6 class="mb-3">Add Admin Comment</h6>
+              <form method="POST" action="{{ url_for('add_admin_comment') }}">
+                <input type="hidden" name="report_id" value="{{ report[0] }}">
+                <div class="mb-3">
+                  <textarea name="comment" class="form-control comment-textarea" 
+                            placeholder="Add a comment or update..." required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-paper-plane me-2"></i>Add Comment
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Sidebar Column -->
+    <div class="col-lg-4">
+      <!-- Status Update Card -->
+      <div class="report-card">
+        <div class="report-card-header">
+          <i class="fas fa-edit"></i>
+          <span>Update Status</span>
+        </div>
+        <div class="report-card-body">
+          <form method="POST" action="{{ url_for('update_status') }}">
+            <input type="hidden" name="report_id" value="{{ report[0] }}">
+            <div class="mb-3">
+              <label for="status" class="form-label">Current Status</label>
+              <select name="status" id="status" class="form-select">
+                <option value="Pending" {% if report[6] == 'Pending' %}selected{% endif %}>Pending</option>
+                <option value="In Progress" {% if report[6] == 'In Progress' %}selected{% endif %}>In Progress</option>
+                <option value="Resolved" {% if report[6] == 'Resolved' %}selected{% endif %}>Resolved</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">
+              <i class="fas fa-save me-2"></i>Update Status
+            </button>
+          </form>
+        </div>
+      </div>
+      
+      <!-- Quick Actions -->
+      <div class="report-card">
+        <div class="report-card-header">
+          <i class="fas fa-bolt"></i>
+          <span>Quick Actions</span>
+        </div>
+        <div class="report-card-body">
+          <div class="action-buttons">
+            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary action-button">
+              <i class="fas fa-list me-2"></i>All Reports
+            </a>
+            <a href="{{ url_for('admin_reports') }}" class="btn btn-outline-info action-button">
+              <i class="fas fa-chart-bar me-2"></i>Analytics
+            </a>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Report Timeline -->
+      <div class="report-card">
+        <div class="report-card-header">
+          <i class="fas fa-clock"></i>
+          <span>Timeline</span>
+        </div>
+        <div class="report-card-body">
+          <div class="timeline">
+            <div class="timeline-item">
+              <div class="timeline-marker"></div>
+              <div class="timeline-content">
+                <div class="timeline-title">Report Submitted</div>
+                <div class="timeline-date">{{ report[7] }}</div>
+              </div>
+            </div>
+            {% if report[8] != report[7] %}
+            <div class="timeline-item">
+              <div class="timeline-marker"></div>
+              <div class="timeline-content">
+                <div class="timeline-title">Last Updated</div>
+                <div class="timeline-date">{{ report[8] }}</div>
+              </div>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.timeline {
+  position: relative;
+  padding-left: 20px;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #e2e8f0;
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.timeline-marker {
+  position: absolute;
+  left: -20px;
+  top: 4px;
+  width: 12px;
+  height: 12px;
+  background: #2dd4bf;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 0 0 2px #e2e8f0;
+}
+
+.timeline-content {
+  padding-left: 10px;
+}
+
+.timeline-title {
+  font-weight: 600;
+  color: #0f172a;
+  font-size: 0.9rem;
+}
+
+.timeline-date {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin-top: 2px;
+}
+</style>
+{% endblock %}

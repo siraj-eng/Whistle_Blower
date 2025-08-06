@@ -1,0 +1,546 @@
+{% extends "base.html" %}
+
+{% block title %}Whistleblower Portal - Safe & Anonymous Reporting{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="hero-title">
+                    Safe & Anonymous<br>
+                    Whistleblower Reporting
+                </h1>
+                <p class="hero-subtitle">
+                    Report workplace safety violations, harassment, or misconduct with complete anonymity. 
+                    Designed specifically for plantation and agricultural workers. Your voice matters, and your safety is our priority.
+                </p>
+                
+                <!-- Language Selector -->
+                <div class="language-selector mb-4">
+                    <div class="btn-group btn-group-sm" role="group">
+                        <button type="button" class="btn btn-outline-light active" onclick="setLanguage('en')">
+                            <i class="fas fa-globe me-1"></i>English
+                        </button>
+                        <button type="button" class="btn btn-outline-light" onclick="setLanguage('sw')">
+                            <i class="fas fa-globe me-1"></i>Swahili
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="d-flex flex-wrap gap-3">
+                    <a href="{{ url_for('submit_report') }}" class="btn btn-light">
+                        <i class="fas fa-plus-circle me-2"></i>
+                        <span id="submit-report-en">Submit Report</span>
+                        <span id="submit-report-sw" style="display:none;">Wasilisha Ripoti</span>
+                    </a>
+                    <a href="{{ url_for('track_report') }}" class="btn btn-outline-light">
+                        <i class="fas fa-search me-2"></i>
+                        <span id="track-report-en">Track Report</span>
+                        <span id="track-report-sw" style="display:none;">Fuatilia Ripoti</span>
+                    </a>
+                </div>
+                
+                <!-- Trust Indicators -->
+                <div class="row mt-4 g-3">
+                    <div class="col-md-4">
+                        <div class="trust-item">
+                            <i class="fas fa-user-secret me-2"></i>
+                            <span>100% Anonymous</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="trust-item">
+                            <i class="fas fa-shield-alt me-2"></i>
+                            <span>Secure & Confidential</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="trust-item">
+                            <i class="fas fa-mobile-alt me-2"></i>
+                            <span>Mobile Friendly</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="p-4 bg-white rounded-lg shadow-sm mt-4 mt-lg-0">
+                    <img src="" alt="Workplace safety" class="img-fluid rounded-lg mb-3">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="p-3 text-center">
+                                <i class="fas fa-hard-hat text-primary mb-2"></i>
+                                <h6 class="mb-0">Safety First</h6>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3 text-center">
+                                <i class="fas fa-users text-primary mb-2"></i>
+                                <h6 class="mb-0">Worker Protection</h6>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3 text-center">
+                                <i class="fas fa-balance-scale text-primary mb-2"></i>
+                                <h6 class="mb-0">Fair Treatment</h6>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-8 text-center">
+                <h2 class="mb-3">
+                    <span id="why-choose-en">Why Choose Our Whistleblower System?</span>
+                    <span id="why-choose-sw" style="display:none;">Kwa nini Uchague Mfumo Wetu wa Ripoti?</span>
+                </h2>
+                <p class="text-muted">
+                    <span id="features-desc-en">Built specifically for plantation and agricultural workers to ensure safety, fairness, and transparency.</span>
+                    <span id="features-desc-sw" style="display:none;">Imejengwa haswa kwa wafanyikazi wa mashamba na kilimo kuhakikisha usalama, haki na uwazi.</span>
+                </p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="feature-icon mx-auto">
+                            <i class="fas fa-user-secret"></i>
+                        </div>
+                        <h5 class="mb-3">
+                            <span id="anonymous-en">Anonymous Reporting</span>
+                            <span id="anonymous-sw" style="display:none;">Ripoti za Kujitolea</span>
+                        </h5>
+                        <p class="text-muted">
+                            <span id="anonymous-desc-en">Submit reports without revealing your identity. Your safety and privacy are our top priorities.</span>
+                            <span id="anonymous-desc-sw" style="display:none;">Wasilisha ripoti bila kufichua utambulisho wako. Usalama wako na faragha ni vipaumbele vyetu vya juu.</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="feature-icon mx-auto">
+                            <i class="fas fa-mobile-alt"></i>
+                        </div>
+                        <h5 class="mb-3">
+                            <span id="mobile-en">Mobile Access</span>
+                            <span id="mobile-sw" style="display:none;">Ufikiaji wa Simu</span>
+                        </h5>
+                        <p class="text-muted">
+                            <span id="mobile-desc-en">Report incidents directly from your phone or tablet. Perfect for field workers and factory staff.</span>
+                            <span id="mobile-desc-sw" style="display:none;">Ripoti matukio moja kwa moja kutoka kwenye simu yako au tablet. Kamili kwa wafanyikazi wa shamba na wafanyakazi wa kiwanda.</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="feature-icon mx-auto">
+                            <i class="fas fa-globe"></i>
+                        </div>
+                        <h5 class="mb-3">
+                            <span id="multilingual-en">Multi-Language Support</span>
+                            <span id="multilingual-sw" style="display:none;">Msaada wa Lugha Nyingi</span>
+                        </h5>
+                        <p class="text-muted">
+                            <span id="multilingual-desc-en">Available in English and Swahili. Report in the language you're most comfortable with.</span>
+                            <span id="multilingual-desc-sw" style="display:none;">Inapatikana kwa Kiingereza na Kiswahili. Ripoti kwa lugha unayofahamu zaidi.</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="feature-icon mx-auto">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h5 class="mb-3">
+                            <span id="secure-en">Secure & Confidential</span>
+                            <span id="secure-sw" style="display:none;">Salama na ya Siri</span>
+                        </h5>
+                        <p class="text-muted">
+                            <span id="secure-desc-en">Military-grade encryption protects your reports. Only authorized personnel can access case files.</span>
+                            <span id="secure-desc-sw" style="display:none;">Usimbaji wa kiwango cha jeshi unalinda ripoti zako. Watu walioidhinishwa tu wanaweza kufikia faili za kesi.</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="feature-icon mx-auto">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <h5 class="mb-3">
+                            <span id="tracking-en">Case Tracking</span>
+                            <span id="tracking-sw" style="display:none;">Ufuatiliaji wa Kesi</span>
+                        </h5>
+                        <p class="text-muted">
+                            <span id="tracking-desc-en">Track the progress of your report using a unique tracking code. Stay informed about your case.</span>
+                            <span id="tracking-desc-sw" style="display:none;">Fuatilia maendeleo ya ripoti yako kwa kutumia msimbo wa kipekee wa ufuatiliaji. Endelea kujulishwa kuhusu kesi yako.</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="feature-icon mx-auto">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h5 class="mb-3">
+                            <span id="compliance-en">Compliance Monitoring</span>
+                            <span id="compliance-sw" style="display:none;">Ufuatiliaji wa Utekelezaji</span>
+                        </h5>
+                        <p class="text-muted">
+                            <span id="compliance-desc-en">Management can monitor trends and ensure compliance with safety and labor standards.</span>
+                            <span id="compliance-sw" style="display:none;">Usimamizi unaweza kufuatilia mielekeo na kuhakikisha utekelezaji wa viwango vya usalama na kazi.</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-8 text-center">
+                <h2 class="mb-3">
+                    <span id="how-works-en">How It Works</span>
+                    <span id="how-works-sw" style="display:none;">Inafanyaje Kazi</span>
+                </h2>
+                <p class="text-muted">
+                    <span id="how-desc-en">Simple, secure, and anonymous reporting process designed for plantation workers.</span>
+                    <span id="how-desc-sw" style="display:none;">Mchakato rahisi, salama na wa kujitolea wa kuripoti uliobuniwa kwa wafanyikazi wa mashamba.</span>
+                </p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="step-number">1</div>
+                        <div class="feature-icon mx-auto">
+                            <i class="fas fa-edit"></i>
+                        </div>
+                        <h5 class="mb-3">
+                            <span id="step1-en">Submit Report</span>
+                            <span id="step1-sw" style="display:none;">Wasilisha Ripoti</span>
+                        </h5>
+                        <p class="text-muted">
+                            <span id="step1-desc-en">Fill out the anonymous form with details about the incident or concern.</span>
+                            <span id="step1-desc-sw" style="display:none;">Jaza fomu ya kujitolea na maelezo kuhusu tukio au wasiwasi.</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="step-number">2</div>
+                        <div class="feature-icon mx-auto">
+                            <i class="fas fa-key"></i>
+                        </div>
+                        <h5 class="mb-3">
+                            <span id="step2-en">Get Tracking Code</span>
+                            <span id="step2-sw" style="display:none;">Pata Msimbo wa Ufuatiliaji</span>
+                        </h5>
+                        <p class="text-muted">
+                            <span id="step2-desc-en">Receive a unique tracking code to monitor your case progress.</span>
+                            <span id="step2-desc-sw" style="display:none;">Pokea msimbo wa kipekee wa ufuatiliaji ili kufuatilia maendeleo ya kesi yako.</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="step-number">3</div>
+                        <div class="feature-icon mx-auto">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <h5 class="mb-3">
+                            <span id="step3-en">Track Progress</span>
+                            <span id="step3-sw" style="display:none;">Fuatilia Maendeleo</span>
+                        </h5>
+                        <p class="text-muted">
+                            <span id="step3-desc-en">Use your tracking code to check case status and receive updates.</span>
+                            <span id="step3-desc-sw" style="display:none;">Tumia msimbo wako wa ufuatiliaji kuangalia hali ya kesi na kupokea sasisho.</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="step-number">4</div>
+                        <div class="feature-icon mx-auto">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <h5 class="mb-3">
+                            <span id="step4-en">Resolution</span>
+                            <span id="step4-sw" style="display:none;">Suluhisho</span>
+                        </h5>
+                        <p class="text-muted">
+                            <span id="step4-desc-en">Management investigates and takes appropriate action to resolve the issue.</span>
+                            <span id="step4-desc-sw" style="display:none;">Usimamizi huchunguza na kuchukua hatua zinazofaa kutatua tatizo.</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Scenarios Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-8 text-center">
+                <h2 class="mb-3">
+                    <span id="scenarios-en">Common Reporting Scenarios</span>
+                    <span id="scenarios-sw" style="display:none;">Mifano ya Kawaida ya Kuripoti</span>
+                </h2>
+                <p class="text-muted">
+                    <span id="scenarios-desc-en">Real situations where our whistleblower system helps protect plantation and agricultural workers.</span>
+                    <span id="scenarios-desc-sw" style="display:none;">Hali halisi ambapo mfumo wetu wa ripoti husaidia kulinda wafanyikazi wa mashamba na kilimo.</span>
+                </p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="scenario-icon safety mb-3">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <h5 class="mb-3">
+                            <span id="safety-violations-en">Safety Violations</span>
+                            <span id="safety-violations-sw" style="display:none;">Uvunjaji wa Usalama</span>
+                        </h5>
+                        <p class="text-muted">
+                            <span id="safety-desc-en">Report unsafe working conditions, missing safety equipment, or hazardous practices in the field or factory.</span>
+                            <span id="safety-desc-sw" style="display:none;">Ripoti hali zisizo salama za kufanya kazi, vifaa vya usalama vilivyokosekana, au mazoea hatari shambani au kiwandani.</span>
+                        </p>
+                        <ul class="text-muted">
+                            <li>Broken machinery without warning signs</li>
+                            <li>Missing personal protective equipment</li>
+                            <li>Unsafe chemical handling procedures</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="scenario-icon harassment mb-3">
+                            <i class="fas fa-user-slash"></i>
+                        </div>
+                        <h5 class="mb-3">
+                            <span id="harassment-en">Harassment & Discrimination</span>
+                            <span id="harassment-sw" style="display:none;">Unyanyasaji na Ubaguzi</span>
+                        </h5>
+                        <p class="text-muted">
+                            <span id="harassment-desc-en">Report workplace harassment, discrimination, or unfair treatment by supervisors or colleagues.</span>
+                            <span id="harassment-desc-sw" style="display:none;">Ripoti unyanyasaji wa mahali pa kazi, ubaguzi, au matibabu yasiyo haki na wasimamizi au wenzako.</span>
+                        </p>
+                        <ul class="text-muted">
+                            <li>Verbal abuse or threats</li>
+                            <li>Unfair treatment based on gender or ethnicity</li>
+                            <li>Retaliation for reporting issues</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="scenario-icon labor mb-3">
+                            <i class="fas fa-child"></i>
+                        </div>
+                        <h5 class="mb-3">
+                            <span id="child-labor-en">Child Labor Concerns</span>
+                            <span id="child-labor-sw" style="display:none;">Wasiwasi wa Kazi ya Watoto</span>
+                        </h5>
+                        <p class="text-muted">
+                            <span id="child-labor-desc-en">Report suspected child labor or underage workers in violation of labor laws and company policies.</span>
+                            <span id="child-labor-desc-sw" style="display:none;">Ripoti kazi ya watoto inayoshukiwa au wafanyikazi chini ya umri kukiuka sheria za kazi na sera za kampuni.</span>
+                        </p>
+                        <ul class="text-muted">
+                            <li>Underage workers in hazardous areas</li>
+                            <li>Children working during school hours</li>
+                            <li>Violation of minimum age requirements</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="scenario-icon welfare mb-3">
+                            <i class="fas fa-home"></i>
+                        </div>
+                        <h5 class="mb-3">
+                            <span id="welfare-en">Welfare & Housing Issues</span>
+                            <span id="welfare-sw" style="display:none;">Masuala ya Ustawi na Makazi</span>
+                        </h5>
+                        <p class="text-muted">
+                            <span id="welfare-desc-en">Report poor living conditions, inadequate housing, or health and safety concerns in worker accommodations.</span>
+                            <span id="welfare-desc-sw" style="display:none;">Ripoti hali mbaya za kuishi, makazi yasiyotosheleza, au wasiwasi wa afya na usalama katika makazi ya wafanyikazi.</span>
+                        </p>
+                        <ul class="text-muted">
+                            <li>Unsafe or unsanitary housing conditions</li>
+                            <li>Lack of clean water or proper sanitation</li>
+                            <li>Overcrowded living spaces</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Trust Section -->
+<section class="py-5 bg-primary text-white">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h2 class="mb-4">
+                    <span id="trust-title-en">Your Safety is Our Priority</span>
+                    <span id="trust-title-sw" style="display:none;">Usalama Wako ni Kipaumbele Chetu</span>
+                </h2>
+                <p class="mb-4">
+                    <span id="trust-desc-en">We understand the challenges faced by plantation and agricultural workers. Our system is designed to protect you while ensuring your concerns are heard and addressed.</span>
+                    <span id="trust-desc-sw" style="display:none;">Tunaelewa changamoto zinazokabiliwa na wafanyikazi wa mashamba na kilimo. Mfumo wetu umeundwa kukulinda huku ukihakikisha wasiwasi wako yanasikika na kushughulikiwa.</span>
+                </p>
+                
+                <div class="trust-features">
+                    <div class="trust-feature mb-3">
+                        <i class="fas fa-lock me-3"></i>
+                        <span id="encryption-en">Military-grade encryption</span>
+                        <span id="encryption-sw" style="display:none;">Usimbaji wa kiwango cha jeshi</span>
+                    </div>
+                    <div class="trust-feature mb-3">
+                        <i class="fas fa-user-secret me-3"></i>
+                        <span id="no-tracking-en">No personal data collection</span>
+                        <span id="no-tracking-sw" style="display:none;">Hakuna ukusanyaji wa data ya kibinafsi</span>
+                    </div>
+                    <div class="trust-feature mb-3">
+                        <i class="fas fa-shield-alt me-3"></i>
+                        <span id="legal-protection-en">Legal protection for whistleblowers</span>
+                        <span id="legal-protection-sw" style="display:none;">Ulinzi wa kisheria kwa watoaji ripoti</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <img src="https://plus.unsplash.com/premium_photo-1664475332572-97dddda34a9d?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8dGh1bWJzJTIwdXAlMjBmYXJtZXJ8ZW58MHx8MHx8fDA%3D" alt="Security illustration" class="img-fluid rounded-lg shadow-sm">
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    /* Scenario icons */
+    .scenario-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+    }
+    
+    .scenario-icon.safety { background-color: #f59e0b; color: white; }
+    .scenario-icon.harassment { background-color: #ef4444; color: white; }
+    .scenario-icon.labor { background-color: #10b981; color: white; }
+    .scenario-icon.welfare { background-color: #3b82f6; color: white; }
+    
+    /* Trust items */
+    .trust-item {
+        padding: 1rem;
+        border-radius: 0.5rem;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        text-align: center;
+    }
+    
+    /* Language selector */
+    .language-selector .btn-group {
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 2rem;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.1rem;
+        }
+    }
+</style>
+
+<script>
+function setLanguage(lang) {
+    // Update button states
+    document.querySelectorAll('.language-selector .btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    event.target.classList.add('active');
+    
+    // Show/hide language content
+    const elements = document.querySelectorAll('[id$="-en"], [id$="-sw"]');
+    elements.forEach(el => {
+        if (lang === 'en') {
+            if (el.id.endsWith('-en')) el.style.display = 'inline';
+            if (el.id.endsWith('-sw')) el.style.display = 'none';
+        } else {
+            if (el.id.endsWith('-en')) el.style.display = 'none';
+            if (el.id.endsWith('-sw')) el.style.display = 'inline';
+        }
+    });
+    
+    // Store language preference in localStorage for other pages
+    localStorage.setItem('selectedLanguage', lang);
+}
+
+// Check for saved language preference on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const savedLang = localStorage.getItem('selectedLanguage');
+    if (savedLang) {
+        setLanguage(savedLang);
+    }
+});
+</script>
+{% endblock %}

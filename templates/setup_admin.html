@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}Setup Admin Account - Whistleblower Portal{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header bg-warning text-dark text-center py-4">
+                    <h2 class="mb-0">
+                        <i class="fas fa-user-plus me-2"></i>Setup Admin Account
+                    </h2>
+                    <p class="mb-0 mt-2">Create the first administrator account</p>
+                </div>
+                <div class="card-body p-5">
+                    <div class="alert alert-info mb-4">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Important:</strong> This will create the first and only admin account. 
+                        Make sure to use a strong password and keep your credentials secure.
+                    </div>
+                    
+                    <form method="POST">
+                        <div class="mb-4">
+                            <label for="username" class="form-label fw-bold">
+                                <i class="fas fa-user me-2"></i>Username
+                            </label>
+                            <input type="text" class="form-control form-control-lg" id="username" name="username" 
+                                   placeholder="Choose a username" required>
+                            <div class="form-text">Choose a unique username for admin access.</div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="password" class="form-label fw-bold">
+                                <i class="fas fa-lock me-2"></i>Password
+                            </label>
+                            <input type="password" class="form-control form-control-lg" id="password" name="password" 
+                                   placeholder="Choose a strong password" required>
+                            <div class="form-text">
+                                Password must be at least 8 characters long and include letters and numbers.
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="confirm_password" class="form-label fw-bold">
+                                <i class="fas fa-lock me-2"></i>Confirm Password
+                            </label>
+                            <input type="password" class="form-control form-control-lg" id="confirm_password" 
+                                   name="confirm_password" placeholder="Confirm your password" required>
+                            <div class="form-text">Re-enter your password to confirm.</div>
+                        </div>
+                        
+                        <div class="alert alert-warning mb-4">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Security Reminder:</strong> 
+                            <ul class="mb-0 mt-2">
+                                <li>Use a strong, unique password</li>
+                                <li>Keep your credentials secure</li>
+                                <li>This will be the only admin account</li>
+                                <li>You cannot create additional admin accounts</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-warning btn-lg">
+                                <i class="fas fa-user-plus me-2"></i>Create Admin Account
+                            </button>
+                            <a href="{{ url_for('admin_login') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Login
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Security Information -->
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-shield-alt text-warning me-2"></i>Admin Account Security
+                    </h5>
+                    <ul class="list-unstyled mb-0">
+                        <li><i class="fas fa-check text-success me-2"></i>Secure password hashing</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Session-based authentication</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Protected admin routes</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Single admin account limit</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const confirmPasswordInput = document.getElementById('confirm_password');
+    
+    form.addEventListener('submit', function(e) {
+        const username = usernameInput.value.trim();
+        const password = passwordInput.value;
+        const confirmPassword = confirmPasswordInput.value;
+        
+        // Username validation
+        if (username.length < 3) {
+            e.preventDefault();
+            alert('Username must be at least 3 characters long.');
+            return;
+        }
+        
+        if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+            e.preventDefault();
+            alert('Username can only contain letters, numbers, and underscores.');
+            return;
+        }
+        
+        // Password validation
+        if (password.length < 8) {
+            e.preventDefault();
+            alert('Password must be at least 8 characters long.');
+            return;
+        }
+        
+        if (!/(?=.*[a-zA-Z])(?=.*\d)/.test(password)) {
+            e.preventDefault();
+            alert('Password must contain both letters and numbers.');
+            return;
+        }
+        
+        // Confirm password validation
+        if (password !== confirmPassword) {
+            e.preventDefault();
+            alert('Passwords do not match.');
+            return;
+        }
+        
+        // Final confirmation
+        if (!confirm('Are you sure you want to create the admin account? This action cannot be undone.')) {
+            e.preventDefault();
+            return;
+        }
+    });
+    
+    // Real-time password strength indicator
+    passwordInput.addEventListener('input', function() {
+        const password = this.value;
+        let strength = 0;
+        
+        if (password.length >= 8) strength++;
+        if (/[a-z]/.test(password)) strength++;
+        if (/[A-Z]/.test(password)) strength++;
+        if (/\d/.test(password)) strength++;
+        if (/[^a-zA-Z0-9]/.test(password)) strength++;
+        
+        const strengthText = ['Very Weak', 'Weak', 'Fair', 'Good', 'Strong'];
+        const strengthColor = ['danger', 'warning', 'info', 'success', 'success'];
+        
+        // You could add a visual indicator here if needed
+    });
+    
+    // Auto-focus on username field
+    usernameInput.focus();
+});
+</script>
+{% endblock %} 

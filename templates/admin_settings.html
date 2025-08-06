@@ -1,0 +1,687 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Settings - Whistleblower System{% endblock %}
+
+{% block content %}
+<style>
+  :root {
+    --primary: #2dd4bf;
+    --primary-light: #99f6e4;
+    --primary-dark: #14b8a6;
+    --secondary: #64748b;
+    --secondary-light: #e2e8f0;
+    --secondary-dark: #475569;
+    --success: #10b981;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --info: #3b82f6;
+    --text-primary: #0f172a;
+    --text-secondary: #334155;
+    --text-muted: #64748b;
+    --bg-primary: #f8fafc;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #f1f5f9;
+    --border-color: #e2e8f0;
+    --border-light: #f1f5f9;
+    --radius-sm: 0.375rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+
+  /* Hide header and footer on admin dashboard */
+  .footer {
+    display: none !important;
+  }
+  
+  .navbar {
+    display: none !important;
+  }
+  
+  /* Dashboard Layout */
+  .dashboard-container {
+    display: flex;
+    min-height: 100vh;
+    background-color: var(--bg-primary);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  /* Modern Sidebar */
+  .sidebar {
+    width: 280px;
+    background: var(--bg-secondary);
+    border-right: 1px solid var(--border-color);
+    padding: 0;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: var(--shadow-md);
+  }
+
+  .sidebar-header {
+    padding: 24px;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-family: 'Montserrat', sans-serif;
+    text-decoration: none;
+  }
+
+  .sidebar-nav {
+    padding: 16px 0;
+  }
+
+  .nav-section {
+    margin-bottom: 24px;
+  }
+
+  .nav-section-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+    padding: 0 24px;
+  }
+
+  .nav-item {
+    margin-bottom: 4px;
+    position: relative;
+  }
+
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 24px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    font-weight: 500;
+    border-left: 3px solid transparent;
+  }
+
+  .nav-link:hover {
+    background: var(--bg-tertiary);
+    color: var(--primary);
+    border-left-color: var(--primary);
+  }
+
+  .nav-link.active {
+    background: rgba(45, 212, 191, 0.05);
+    color: var(--primary);
+    border-left-color: var(--primary);
+    font-weight: 600;
+  }
+
+  .nav-link i {
+    width: 20px;
+    text-align: center;
+    font-size: 16px;
+    color: inherit;
+  }
+
+  .nav-link.logout {
+    color: var(--danger);
+  }
+
+  .nav-link.logout:hover {
+    background: rgba(239, 68, 68, 0.05);
+    border-left-color: var(--danger);
+  }
+
+  /* Main Content Styles */
+  .main-content {
+    flex: 1;
+    margin-left: 280px;
+    padding: 32px;
+    background-color: var(--bg-primary);
+    min-height: 100vh;
+  }
+
+  /* Header Styles */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    padding: 24px;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .header-title h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 4px 0;
+  }
+
+  .header-title p {
+    color: var(--text-muted);
+    margin: 0;
+    font-size: 14px;
+  }
+
+  .user-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .user-avatar {
+    width: 40px;
+    height: 40px;
+    background: var(--primary);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 16px;
+  }
+
+  .user-info h4 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .user-info p {
+    margin: 0;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  /* Settings Grid */
+  .settings-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+
+  .settings-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .settings-card-header {
+    padding: 16px 20px;
+    background: var(--bg-tertiary);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .settings-card-body {
+    padding: 20px;
+  }
+
+  .setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-light);
+  }
+
+  .setting-item:last-child {
+    border-bottom: none;
+  }
+
+  .setting-label {
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+
+  .setting-description {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  .toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+  }
+
+  .toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--secondary-light);
+    transition: .4s;
+    border-radius: 24px;
+  }
+
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+  }
+
+  input:checked + .slider {
+    background-color: var(--primary);
+  }
+
+  input:checked + .slider:before {
+    transform: translateX(26px);
+  }
+
+  .btn-settings {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .btn-settings:hover {
+    background: var(--primary-dark);
+  }
+
+  .btn-settings.secondary {
+    background: var(--secondary);
+  }
+
+  .btn-settings.secondary:hover {
+    background: var(--secondary-dark);
+  }
+
+  .btn-settings.danger {
+    background: var(--danger);
+  }
+
+  .btn-settings.danger:hover {
+    background: #dc2626;
+  }
+
+  /* Mobile Responsive */
+  @media (max-width: 768px) {
+    .sidebar {
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+    }
+    
+    .sidebar.active {
+      transform: translateX(0);
+    }
+    
+    .main-content {
+      margin-left: 0;
+    }
+    
+    .settings-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<div class="dashboard-container">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <a href="{{ url_for('admin_dashboard') }}" class="logo">
+        <span>Whistleblower</span>
+      </a>
+    </div>
+    
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-section-title">Navigation</div>
+        <ul>
+          <li class="nav-item">
+            <a href="{{ url_for('admin_dashboard') }}" class="nav-link">
+              <i class="fas fa-tachometer-alt"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="{{ url_for('admin_reports') }}" class="nav-link">
+              <i class="fas fa-chart-bar"></i>
+              <span>Report Overview</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="{{ url_for('admin_report_log') }}" class="nav-link">
+              <i class="fas fa-book"></i>
+              <span>Report Log</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="{{ url_for('admin_settings') }}" class="nav-link active">
+              <i class="fas fa-cog"></i>
+              <span>Admin Settings</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+      
+      <div class="nav-section">
+        <div class="nav-section-title">Actions</div>
+        <ul>
+          <li class="nav-item">
+            <a href="{{ url_for('index') }}" class="nav-link">
+              <i class="fas fa-external-link-alt"></i>
+              <span>View Public Site</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="{{ url_for('admin_logout') }}" class="nav-link logout">
+              <i class="fas fa-sign-out-alt"></i>
+              <span>Logout</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Header -->
+    <div class="header">
+      <div class="header-title">
+        <h1>Admin Settings</h1>
+        <p>Manage system configuration and preferences</p>
+      </div>
+      
+      <div class="user-profile">
+        <div class="user-avatar">A</div>
+        <div class="user-info">
+          <h4>Admin User</h4>
+          <p>Administrator</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings Grid -->
+    <div class="settings-grid">
+      <!-- System Settings -->
+      <div class="settings-card">
+        <div class="settings-card-header">
+          <span><i class="fas fa-cogs me-2"></i>System Settings</span>
+        </div>
+        <div class="settings-card-body">
+          <div class="setting-item">
+            <div>
+              <div class="setting-label">Auto-refresh Dashboard</div>
+              <div class="setting-description">Automatically refresh dashboard every 30 seconds</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+          
+          <div class="setting-item">
+            <div>
+              <div class="setting-label">Email Notifications</div>
+              <div class="setting-description">Receive email alerts for new reports</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox">
+              <span class="slider"></span>
+            </label>
+          </div>
+          
+          <div class="setting-item">
+            <div>
+              <div class="setting-label">Report Categories</div>
+              <div class="setting-description">Manage report categories</div>
+            </div>
+            <button class="btn-settings">Manage</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Security Settings -->
+      <div class="settings-card">
+        <div class="settings-card-header">
+          <span><i class="fas fa-shield-alt me-2"></i>Security Settings</span>
+        </div>
+        <div class="settings-card-body">
+          <div class="setting-item">
+            <div>
+              <div class="setting-label">Two-Factor Authentication</div>
+              <div class="setting-description">Enable 2FA for enhanced security</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox">
+              <span class="slider"></span>
+            </label>
+          </div>
+          
+          <div class="setting-item">
+            <div>
+              <div class="setting-label">Session Timeout</div>
+              <div class="setting-description">Auto-logout after inactivity</div>
+            </div>
+            <button class="btn-settings secondary">30 min</button>
+          </div>
+          
+          <div class="setting-item">
+            <div>
+              <div class="setting-label">Change Password</div>
+              <div class="setting-description">Update your admin password</div>
+            </div>
+            <button class="btn-settings">Change</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Data Management -->
+      <div class="settings-card">
+        <div class="settings-card-header">
+          <span><i class="fas fa-database me-2"></i>Data Management</span>
+        </div>
+        <div class="settings-card-body">
+          <div class="setting-item">
+            <div>
+              <div class="setting-label">Backup Database</div>
+              <div class="setting-description">Create a backup of all data</div>
+            </div>
+            <button class="btn-settings">Backup</button>
+          </div>
+          
+          <div class="setting-item">
+            <div>
+              <div class="setting-label">Export Reports</div>
+              <div class="setting-description">Export reports to CSV/Excel</div>
+            </div>
+            <button class="btn-settings secondary">Export</button>
+          </div>
+          
+          <div class="setting-item">
+            <div>
+              <div class="setting-label">Clear Old Data</div>
+              <div class="setting-description">Remove reports older than 1 year</div>
+            </div>
+            <button class="btn-settings danger">Clear</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- System Information -->
+      <div class="settings-card">
+        <div class="settings-card-header">
+          <span><i class="fas fa-info-circle me-2"></i>System Information</span>
+        </div>
+        <div class="settings-card-body">
+          <div class="setting-item">
+            <div>
+              <div class="setting-label">Current Admin</div>
+              <div class="setting-description">Logged in administrator</div>
+            </div>
+            <span style="color: var(--primary); font-weight: 500;">Admin User</span>
+          </div>
+          
+          <div class="setting-item">
+            <div>
+              <div class="setting-label">Database</div>
+              <div class="setting-description">Storage system</div>
+            </div>
+            <span style="color: var(--text-muted);">SQLite</span>
+          </div>
+          
+          <div class="setting-item">
+            <div>
+              <div class="setting-label">Version</div>
+              <div class="setting-description">System version</div>
+            </div>
+            <span style="color: var(--text-muted);">1.0.0</span>
+          </div>
+          
+          <div class="setting-item">
+            <div>
+              <div class="setting-label">Total Reports</div>
+              <div class="setting-description">Reports in database</div>
+            </div>
+            <span style="color: var(--success); font-weight: 500;">{{ total_reports|default(0) }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Additional Settings -->
+    <div class="settings-card">
+      <div class="settings-card-header">
+        <span><i class="fas fa-tools me-2"></i>Advanced Settings</span>
+      </div>
+      <div class="settings-card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <h6>Notification Preferences</h6>
+            <div class="setting-item">
+              <div>
+                <div class="setting-label">New Report Alerts</div>
+                <div class="setting-description">Get notified when new reports are submitted</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+            
+            <div class="setting-item">
+              <div>
+                <div class="setting-label">Status Change Notifications</div>
+                <div class="setting-description">Notify when report status changes</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+          
+          <div class="col-md-6">
+            <h6>Display Settings</h6>
+            <div class="setting-item">
+              <div>
+                <div class="setting-label">Dark Mode</div>
+                <div class="setting-description">Switch to dark theme</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox">
+                <span class="slider"></span>
+              </label>
+            </div>
+            
+            <div class="setting-item">
+              <div>
+                <div class="setting-label">Compact View</div>
+                <div class="setting-description">Use compact layout for reports</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox">
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+// Toggle switch functionality
+document.querySelectorAll('.toggle-switch input').forEach(toggle => {
+  toggle.addEventListener('change', function() {
+    const settingName = this.closest('.setting-item').querySelector('.setting-label').textContent;
+    console.log(`${settingName}: ${this.checked ? 'enabled' : 'disabled'}`);
+    // Here you would typically save the setting to the backend
+  });
+});
+
+// Button click handlers
+document.querySelectorAll('.btn-settings').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const action = this.textContent.toLowerCase();
+    const settingName = this.closest('.setting-item').querySelector('.setting-label').textContent;
+    
+    if (action === 'backup') {
+      alert('Backup functionality will be implemented in future updates.');
+    } else if (action === 'export') {
+      alert('Export functionality will be implemented in future updates.');
+    } else if (action === 'clear') {
+      if (confirm('Are you sure you want to clear old data? This action cannot be undone.')) {
+        alert('Data clearing functionality will be implemented in future updates.');
+      }
+    } else if (action === 'manage') {
+      alert('Category management will be implemented in future updates.');
+    } else if (action === 'change') {
+      alert('Password change functionality will be implemented in future updates.');
+    }
+  });
+});
+</script>
+{% endblock %} 

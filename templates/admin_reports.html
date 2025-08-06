@@ -1,0 +1,563 @@
+{% extends "base.html" %}
+
+{% block title %}Reports & Analytics - Whistleblower System{% endblock %}
+
+{% block content %}
+<style>
+  :root {
+    --primary: #2dd4bf;
+    --primary-light: #99f6e4;
+    --primary-dark: #14b8a6;
+    --secondary: #64748b;
+    --secondary-light: #e2e8f0;
+    --secondary-dark: #475569;
+    --success: #10b981;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --info: #3b82f6;
+    --text-primary: #0f172a;
+    --text-secondary: #334155;
+    --text-muted: #64748b;
+    --bg-primary: #f8fafc;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #f1f5f9;
+    --border-color: #e2e8f0;
+    --border-light: #f1f5f9;
+    --radius-sm: 0.375rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+
+  /* Hide header and footer on admin dashboard */
+  .footer {
+    display: none !important;
+  }
+  
+  .navbar {
+    display: none !important;
+  }
+  
+  /* Dashboard Layout */
+  .dashboard-container {
+    display: flex;
+    min-height: 100vh;
+    background-color: var(--bg-primary);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  /* Modern Sidebar */
+  .sidebar {
+    width: 280px;
+    background: var(--bg-secondary);
+    border-right: 1px solid var(--border-color);
+    padding: 0;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: var(--shadow-md);
+  }
+
+  .sidebar-header {
+    padding: 24px;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-family: 'Montserrat', sans-serif;
+    text-decoration: none;
+  }
+
+  .logo-icon {
+    width: 36px;
+    height: 36px;
+    background: var(--primary);
+    color: white;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+  }
+
+  .sidebar-nav {
+    padding: 16px 0;
+  }
+
+  .nav-section {
+    margin-bottom: 24px;
+  }
+
+  .nav-section-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+    padding: 0 24px;
+  }
+
+  .nav-item {
+    margin-bottom: 4px;
+    position: relative;
+  }
+
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 24px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    font-weight: 500;
+    border-left: 3px solid transparent;
+  }
+
+  .nav-link:hover {
+    background: var(--bg-tertiary);
+    color: var(--primary);
+    border-left-color: var(--primary);
+  }
+
+  .nav-link.active {
+    background: rgba(45, 212, 191, 0.05);
+    color: var(--primary);
+    border-left-color: var(--primary);
+    font-weight: 600;
+  }
+
+  .nav-link i {
+    width: 20px;
+    text-align: center;
+    font-size: 16px;
+    color: inherit;
+  }
+
+  .nav-link.logout {
+    color: var(--danger);
+  }
+
+  .nav-link.logout:hover {
+    background: rgba(239, 68, 68, 0.05);
+    border-left-color: var(--danger);
+  }
+
+  /* Main Content Styles */
+  .main-content {
+    flex: 1;
+    margin-left: 280px;
+    padding: 32px;
+    background-color: var(--bg-primary);
+    min-height: 100vh;
+  }
+
+  /* Header Styles */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    padding: 24px;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .header-title h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 4px 0;
+  }
+
+  .header-title p {
+    color: var(--text-muted);
+    margin: 0;
+    font-size: 14px;
+  }
+
+  .user-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .user-avatar {
+    width: 40px;
+    height: 40px;
+    background: var(--primary);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 16px;
+  }
+
+  .user-info h4 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .user-info p {
+    margin: 0;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  /* Analytics Grid */
+  .analytics-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+
+  .analytics-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .analytics-card-header {
+    padding: 16px 20px;
+    background: var(--bg-tertiary);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .analytics-card-body {
+    padding: 20px;
+  }
+
+  .chart-container {
+    position: relative;
+    height: 300px;
+  }
+
+  .categories-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .categories-list li {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .categories-list li:last-child {
+    border-bottom: none;
+  }
+
+  .badge {
+    background: var(--primary);
+    color: white;
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  /* Mobile Responsive */
+  @media (max-width: 768px) {
+    .sidebar {
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+    }
+    
+    .sidebar.active {
+      transform: translateX(0);
+    }
+    
+    .main-content {
+      margin-left: 0;
+    }
+    
+    .analytics-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<div class="dashboard-container">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <a href="{{ url_for('admin_dashboard') }}" class="logo">
+        <span>Whistleblower</span>
+      </a>
+    </div>
+    
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-section-title">Navigation</div>
+        <ul>
+          <li class="nav-item">
+            <a href="{{ url_for('admin_dashboard') }}" class="nav-link">
+              <i class="fas fa-tachometer-alt"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="{{ url_for('admin_reports') }}" class="nav-link active">
+              <i class="fas fa-chart-bar"></i>
+              <span>Report Overview</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="{{ url_for('admin_report_log') }}" class="nav-link">
+              <i class="fas fa-book"></i>
+              <span>Report Log</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="{{ url_for('admin_settings') }}" class="nav-link">
+              <i class="fas fa-cog"></i>
+              <span>Admin Settings</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+      
+      <div class="nav-section">
+        <div class="nav-section-title">Actions</div>
+        <ul>
+          <li class="nav-item">
+            <a href="{{ url_for('index') }}" class="nav-link">
+              <i class="fas fa-external-link-alt"></i>
+              <span>View Public Site</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="{{ url_for('admin_logout') }}" class="nav-link logout">
+              <i class="fas fa-sign-out-alt"></i>
+              <span>Logout</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Header -->
+    <div class="header">
+      <div class="header-title">
+        <h1>Reports & Analytics</h1>
+        <p>Visual insights and statistics about whistleblower reports</p>
+      </div>
+      
+      <div class="user-profile">
+        <div class="user-avatar">A</div>
+        <div class="user-info">
+          <h4>Admin User</h4>
+          <p>Administrator</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Analytics Grid -->
+    <div class="analytics-grid">
+      <!-- Left Column -->
+      <div>
+        <!-- Bar Chart -->
+        <div class="analytics-card">
+          <div class="analytics-card-header">
+            <span>Reports by Category (Plantation Focus)</span>
+            <span class="badge">Bar Chart</span>
+          </div>
+          <div class="analytics-card-body">
+            <div class="chart-container">
+              <canvas id="categoryChart"></canvas>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Pie Chart -->
+        <div class="analytics-card" style="margin-top: 24px;">
+          <div class="analytics-card-header">
+            <span>Reports by Category (Plantation Focus)</span>
+            <span class="badge">Pie Chart</span>
+          </div>
+          <div class="analytics-card-body">
+            <div class="chart-container">
+              <canvas id="categoryPieChart"></canvas>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Top Categories -->
+        <div class="analytics-card" style="margin-top: 24px;">
+          <div class="analytics-card-header">
+            <span>Most Reported Categories</span>
+            <span class="badge">Top 5</span>
+          </div>
+          <div class="analytics-card-body">
+            <ul class="categories-list" id="topCategories">
+              <!-- Populated by JS -->
+            </ul>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Right Column - Map -->
+      <div>
+        <div class="analytics-card">
+          <div class="analytics-card-header">
+            <span>Report Locations Map</span>
+            <span class="badge">Kenya</span>
+          </div>
+          <div class="analytics-card-body">
+            <div id="map" style="height: 400px; width: 100%;"></div>
+            <div id="mapMessage" class="text-center text-muted mt-2" style="display:none;">No report locations to display.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Extra Features -->
+    <div class="analytics-card">
+      <div class="analytics-card-header">
+        <span>Extra Features</span>
+        <span class="badge">Coming Soon</span>
+      </div>
+      <div class="analytics-card-body">
+        <ul>
+          <li>Filter by date range</li>
+          <li>Export reports/statistics</li>
+          <li>Custom analytics widgets</li>
+          <li>And more...</li>
+        </ul>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Leaflet.js -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+// These will be replaced by backend data
+const categoryData = {{ category_data|tojson|safe }};
+const locationData = {{ location_data|tojson|safe }};
+
+// Chart.js: Reports by Category (Bar)
+const ctx = document.getElementById('categoryChart').getContext('2d');
+const chart = new Chart(ctx, {
+  type: 'bar',
+  data: {
+    labels: categoryData.labels,
+    datasets: [{
+      label: 'Reports',
+      data: categoryData.counts,
+      backgroundColor: 'rgba(45, 212, 191, 0.7)',
+      borderColor: 'rgba(20, 184, 166, 1)',
+      borderWidth: 1
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } }
+  }
+});
+
+// Chart.js: Reports by Category (Pie)
+const pieCtx = document.getElementById('categoryPieChart').getContext('2d');
+const pieChart = new Chart(pieCtx, {
+  type: 'pie',
+  data: {
+    labels: categoryData.labels,
+    datasets: [{
+      data: categoryData.counts,
+      backgroundColor: [
+        'rgba(45, 212, 191, 0.7)',
+        'rgba(59, 130, 246, 0.7)',
+        'rgba(16, 185, 129, 0.7)',
+        'rgba(245, 158, 11, 0.7)',
+        'rgba(239, 68, 68, 0.7)',
+        'rgba(100, 116, 139, 0.7)',
+        'rgba(234, 179, 8, 0.7)'
+      ],
+      borderColor: 'rgba(255,255,255,1)',
+      borderWidth: 2
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { position: 'bottom' } }
+  }
+});
+
+// Top Categories List
+const topCategories = categoryData.labels.map((cat, i) => ({cat, count: categoryData.counts[i]}))
+  .sort((a, b) => b.count - a.count).slice(0, 5);
+const topList = document.getElementById('topCategories');
+topCategories.forEach(item => {
+  const li = document.createElement('li');
+  li.innerHTML = `${item.cat} <span class='badge'>${item.count}</span>`;
+  topList.appendChild(li);
+});
+
+// Leaflet Map - Centered on Kenya
+const kenyaLatLng = [0.0236, 37.9062];
+const map = L.map('map', {scrollWheelZoom: false, zoomControl: true}).setView(kenyaLatLng, 6);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 18,
+  attribution: '© OpenStreetMap contributors'
+}).addTo(map);
+
+let hasMarkers = false;
+locationData.forEach(loc => {
+  // Only show markers with valid lat/lng in Kenya (approximate bounding box)
+  if(loc.lat && loc.lng && loc.lat > -5 && loc.lat < 5 && loc.lng > 33 && loc.lng < 42) {
+    L.marker([loc.lat, loc.lng]).addTo(map)
+      .bindPopup(`<b>${loc.category}</b><br>${loc.location}`);
+    hasMarkers = true;
+  }
+});
+
+if (!hasMarkers) {
+  document.getElementById('mapMessage').style.display = 'block';
+  document.getElementById('map').style.opacity = 0.5;
+}
+
+window.addEventListener('resize', function() {
+  map.invalidateSize();
+});
+</script>
+{% endblock %}

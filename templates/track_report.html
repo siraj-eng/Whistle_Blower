@@ -1,0 +1,303 @@
+{% extends "base.html" %}
+
+{% block title %}Track Report - Whistleblower Portal{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            {% if not report %}
+            <!-- Search Form -->
+            <div class="card shadow-sm border-0 overflow-hidden">
+                <div class="card-header bg-gradient-primary text-white text-center py-4">
+                    <h2 class="mb-0">
+                        <i class="fas fa-search me-2"></i>Track Your Report
+                    </h2>
+                    <p class="mb-0 mt-2 opacity-75">Enter your tracking code to check the status</p>
+                </div>
+                <div class="card-body p-4 p-md-5">
+                    <div class="alert alert-info bg-primary-soft border-primary mb-4">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-info-circle me-3 text-primary"></i>
+                            <div>
+                                <strong class="d-block">How to track:</strong>
+                                Enter the 8-character tracking code you received when you submitted your report.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <form method="POST" class="needs-validation" novalidate>
+                        <div class="mb-4">
+                            <label for="tracking_code" class="form-label fw-semibold text-secondary">
+                                <i class="fas fa-qrcode me-2 text-primary"></i>Tracking Code
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-primary-soft">
+                                    <i class="fas fa-hashtag text-primary"></i>
+                                </span>
+                                <input type="text" class="form-control form-control-lg text-center tracking-input" 
+                                       id="tracking_code" name="tracking_code" 
+                                       placeholder="AB12CD34" 
+                                       maxlength="8" required>
+                            </div>
+                            <div class="form-text text-muted small mt-1">Enter the tracking code exactly as provided (case-sensitive)</div>
+                        </div>
+                        
+                        <div class="d-grid gap-3 mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg py-3">
+                                <i class="fas fa-search me-2"></i>Track Report
+                            </button>
+                            <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Home
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Information Cards -->
+            <div class="row mt-4 g-4">
+                <div class="col-md-6">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <div class="bg-primary-soft rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                                <i class="fas fa-clock text-primary fs-4"></i>
+                            </div>
+                            <h5 class="card-title mb-2">Real-time Updates</h5>
+                            <p class="card-text text-muted">Check your report status and any follow-up comments from administrators.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <div class="bg-primary-soft rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                                <i class="fas fa-comments text-primary fs-4"></i>
+                            </div>
+                            <h5 class="card-title mb-2">Follow-up Comments</h5>
+                            <p class="card-text text-muted">View any comments or updates from the investigation team.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            {% else %}
+            <!-- Report Details -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-gradient-success text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0">
+                            <i class="fas fa-file-alt me-2"></i>Report Found
+                        </h3>
+                        <span class="badge bg-white text-success fs-6">{{ report[6] }}</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="bg-light p-3 rounded mb-3">
+                                <h6 class="text-muted mb-2">Tracking Code</h6>
+                                <code class="fs-5">{{ tracking_code[:2] }}****{{ tracking_code[-2:] }}</code>
+                            </div>
+                            <div class="mb-3">
+                                <h6 class="text-muted mb-2">Category</h6>
+                                <span class="badge bg-secondary">{{ report[4] }}</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <h6 class="text-muted mb-2">Priority</h6>
+                                <span class="badge bg-{{ 'danger' if report[5] == 'Critical' else 'warning' if report[5] == 'High' else 'info' if report[5] == 'Medium' else 'secondary' }}">
+                                    {{ report[5] }}
+                                </span>
+                            </div>
+                            <div class="mb-3">
+                                <h6 class="text-muted mb-2">Submitted</h6>
+                                <p class="mb-0">{{ report[7] }}</p>
+                            </div>
+                            <div class="mb-3">
+                                <h6 class="text-muted mb-2">Last Updated</h6>
+                                <p class="mb-0">{{ report[8] }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Report Content -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-heading me-2 text-primary"></i>{{ report[2] }}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <h6 class="text-muted mb-3">Description</h6>
+                    <div class="bg-light p-3 rounded">
+                        {{ report[3] | nl2br }}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Comments Section -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">
+                            <i class="fas fa-comments me-2 text-primary"></i>Follow-up Comments
+                        </h4>
+                        {% if comments %}
+                        <span class="badge bg-primary">{{ comments|length }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if comments %}
+                        <div class="comment-list">
+                            {% for comment in comments %}
+                            <div class="comment-item border-bottom pb-3 mb-3">
+                                <div class="d-flex align-items-start">
+                                    <div class="flex-shrink-0 me-3">
+                                        <div class="avatar bg-{{ 'primary' if comment[3] else 'info' }}-soft rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                            <i class="fas fa-{{ 'user-shield' if comment[3] else 'user' }} text-{{ 'primary' if comment[3] else 'info' }}"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span class="badge bg-{{ 'primary' if comment[3] else 'info' }} me-2">
+                                                {{ 'Admin' if comment[3] else 'User' }}
+                                            </span>
+                                            <small class="text-muted">{{ comment[4] }}</small>
+                                        </div>
+                                        <div class="bg-light p-3 rounded">
+                                            {{ comment[2] | nl2br }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-comment-slash text-muted mb-3" style="font-size: 3rem;"></i>
+                            <p class="text-muted">No comments yet. Check back later for updates.</p>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- User Add Comment Form -->
+                    <hr class="my-4">
+                    <h5 class="mb-3">
+                        <i class="fas fa-plus-circle me-2 text-primary"></i>Add a Comment
+                    </h5>
+                    <form id="userCommentForm" class="needs-validation" novalidate>
+                        <input type="hidden" name="tracking_code" id="user_tracking_code" value="{{ tracking_code }}">
+                        <div class="mb-3">
+                            <textarea class="form-control" id="user_comment_text" name="comment" rows="4" 
+                                      placeholder="Add a comment or follow-up question..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane me-2"></i>Submit Comment
+                        </button>
+                    </form>
+                    <div id="user-comment-success" class="alert alert-success mt-3 d-none"></div>
+                    <div id="user-comment-error" class="alert alert-danger mt-3 d-none"></div>
+                </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="d-grid gap-3 mt-4">
+                <a href="{{ url_for('track_report') }}" class="btn btn-primary">
+                    <i class="fas fa-search me-2"></i>Track Another Report
+                </a>
+                <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-home me-2"></i>Back to Home
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const trackingInput = document.getElementById('tracking_code');
+    if (trackingInput) {
+        trackingInput.addEventListener('input', function() {
+            this.value = this.value.toUpperCase();
+        });
+        
+        trackingInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                this.form.submit();
+            }
+        });
+    }
+
+    // User comment form AJAX
+    let lastUserComment = '';
+    const userCommentForm = document.getElementById('userCommentForm');
+    if (userCommentForm) {
+        userCommentForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const trackingCode = document.getElementById('user_tracking_code').value;
+            const comment = document.getElementById('user_comment_text').value.trim();
+            const successDiv = document.getElementById('user-comment-success');
+            const errorDiv = document.getElementById('user-comment-error');
+            successDiv.classList.add('d-none');
+            errorDiv.classList.add('d-none');
+            if (!comment) {
+                errorDiv.textContent = 'Please enter a comment.';
+                errorDiv.classList.remove('d-none');
+                return;
+            }
+            if (comment === lastUserComment) {
+                errorDiv.textContent = 'You cannot submit the same comment twice in a row.';
+                errorDiv.classList.remove('d-none');
+                return;
+            }
+            fetch('/add_user_comment', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                body: `tracking_code=${encodeURIComponent(trackingCode)}&comment=${encodeURIComponent(comment)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    successDiv.textContent = 'Comment submitted successfully! Refresh the page to see your comment.';
+                    successDiv.classList.remove('d-none');
+                    userCommentForm.reset();
+                    lastUserComment = comment;
+                } else {
+                    errorDiv.textContent = data.error || 'Failed to submit comment.';
+                    errorDiv.classList.remove('d-none');
+                }
+            })
+            .catch(() => {
+                errorDiv.textContent = 'Failed to submit comment.';
+                errorDiv.classList.remove('d-none');
+            });
+        });
+    }
+});
+</script>
+
+<style>
+.tracking-input {
+    font-family: 'Courier New', monospace;
+    font-size: 1.2rem;
+    letter-spacing: 1px;
+}
+.bg-primary-soft {
+    background-color: rgba(13, 110, 253, 0.1);
+}
+.comment-item:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+.avatar {
+    font-size: 0.9rem;
+}
+</style>
+{% endblock %}

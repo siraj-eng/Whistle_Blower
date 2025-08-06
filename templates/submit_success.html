@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Report Submitted Successfully{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card text-center">
+                <div class="card-header bg-success text-white py-4">
+                    <h2 class="mb-0">
+                        <i class="fas fa-check-circle me-2"></i>Report Submitted!
+                    </h2>
+                </div>
+                <div class="card-body p-5">
+                    <h4 class="mb-4">Thank you for your submission.</h4>
+                    <p class="lead mb-4">
+                        Your anonymous report has been received. Please save your unique tracking code below to follow up on your report's status.
+                    </p>
+                    
+                    <div class="mb-4">
+                        <span class="badge bg-primary fs-4 p-3" style="letter-spacing: 2px;">
+                            {{ tracking_code }}
+                        </span>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <button class="btn btn-outline-primary" onclick="copyCode()">
+                            <i class="fas fa-copy me-2"></i>Copy Tracking Code
+                        </button>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <a href="{{ url_for('track_report') }}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-search me-2"></i>Follow Up / Track Report
+                        </a>
+                    </div>
+                    
+                    <div class="alert alert-info mt-4">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Note:</strong> You will need your tracking code to check the status or receive updates. Keep it safe!<br>
+                        <span class="text-muted">You can check your report status at any time using your code.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function copyCode() {
+    const code = '{{ tracking_code }}';
+    navigator.clipboard.writeText(code).then(function() {
+        alert('Tracking code copied to clipboard!');
+    }, function(err) {
+        alert('Failed to copy tracking code.');
+    });
+}
+</script>
+{% endblock %}

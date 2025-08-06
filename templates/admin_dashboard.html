@@ -1,0 +1,1783 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Whistleblower System{% endblock %}
+
+{% block content %}
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap');
+
+  :root {
+    --primary: #20b2aa;
+    --primary-light: #7fcdcd;
+    --primary-dark: #008b8b;
+    --secondary: #64748b;
+    --secondary-light: #e2e8f0;
+    --secondary-dark: #475569;
+    --success: #10b981;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --info: #20b2aa;
+    --text-primary: #1e293b;
+    --text-secondary: #334155;
+    --text-muted: #64748b;
+    --bg-primary: #f8fafc;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #f1f5f9;
+    --border-color: #e2e8f0;
+    --border-light: #f1f5f9;
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    line-height: 1.6;
+    color: var(--text-primary);
+    background-color: var(--bg-primary);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  /* Hide header and footer on admin dashboard */
+  .footer, .navbar {
+    display: none !important;
+  }
+  
+  /* Dashboard Layout */
+  .dashboard-container {
+    display: flex;
+    min-height: 100vh;
+    background-color: var(--bg-primary);
+  }
+
+  /* Modern Sidebar */
+  .sidebar {
+    width: 280px;
+    background: var(--bg-secondary);
+    border-right: 1px solid var(--border-color);
+    padding: 0;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: var(--shadow-md);
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar-header {
+    padding: 24px;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 20px;
+    font-weight: 900;
+    font-family: 'Montserrat', sans-serif;
+    color: var(--primary);
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .logo-icon {
+    width: 32px;
+    height: 32px;
+    background: var(--primary);
+    color: white;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .sidebar-nav {
+    padding: 16px 0;
+  }
+
+  .nav-section {
+    margin-bottom: 24px;
+  }
+
+  .nav-section-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+    padding: 0 24px;
+  }
+
+  .nav-item {
+    margin-bottom: 4px;
+  }
+
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 24px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    font-weight: 500;
+    border-left: 3px solid transparent;
+  }
+
+  .nav-link:hover, .nav-link.active {
+    background: rgba(59, 130, 246, 0.05);
+    color: var(--primary);
+    border-left-color: var(--primary);
+  }
+
+  .nav-link.active {
+    font-weight: 600;
+  }
+
+  .nav-link i {
+    width: 20px;
+    text-align: center;
+    font-size: 16px;
+    color: inherit;
+  }
+
+  .nav-link.logout {
+    color: var(--danger);
+  }
+
+  .nav-link.logout:hover {
+    background: rgba(239, 68, 68, 0.05);
+    border-left-color: var(--danger);
+  }
+
+  /* Main Content Styles */
+  .main-content {
+    flex: 1;
+    margin-left: 280px;
+    padding: 32px;
+    min-height: 100vh;
+  }
+
+  /* Header Styles */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    padding: 24px;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .header-title h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+  }
+
+  .header-title p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-top: 8px;
+    margin-bottom: 0;
+  }
+
+  .user-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .user-avatar {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 600;
+    color: white;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .user-info h4 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .user-info p {
+    margin: 0;
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  /* Stats Grid */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+  }
+
+  .stat-card {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    border: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .stat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+  }
+
+  .stat-title {
+    font-size: 14px;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  .stat-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: white;
+  }
+
+  .stat-icon.reports {
+    background: linear-gradient(135deg, var(--success), #059669);
+  }
+
+  .stat-icon.pending {
+    background: linear-gradient(135deg, var(--warning), #d97706);
+  }
+
+  .stat-icon.in-progress {
+    background: linear-gradient(135deg, var(--info), #2563eb);
+  }
+
+  .stat-icon.resolved {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  }
+
+  .stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 8px 0 4px;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .stat-change {
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .stat-change.positive {
+    color: var(--success);
+  }
+
+  .stat-change.negative {
+    color: var(--danger);
+  }
+
+  /* Reports Table */
+  .reports-table-container {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 32px;
+    overflow: hidden;
+  }
+
+  .table-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .table-header h2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .filter-tabs {
+    display: flex;
+    gap: 8px;
+  }
+
+  .filter-btn {
+    padding: 8px 16px;
+    background: var(--bg-tertiary);
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .filter-btn:hover {
+    background: var(--border-color);
+  }
+
+  .filter-btn.active {
+    background: var(--primary);
+    color: white;
+  }
+
+  .table-responsive {
+    overflow-x: auto;
+  }
+
+  .reports-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .reports-table th {
+    padding: 16px 24px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: var(--bg-tertiary);
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .reports-table td {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: middle;
+    font-size: 14px;
+  }
+
+  .report-row:hover {
+    background: var(--bg-tertiary);
+  }
+
+  .tracking-code {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    background: var(--bg-tertiary);
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    display: inline-block;
+  }
+
+  .report-title {
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .report-description {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin: 0;
+  }
+
+  .status-badge, .priority-badge {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 20px;
+    display: inline-block;
+    white-space: nowrap;
+  }
+
+  .status-pending {
+    background: rgba(245, 158, 11, 0.1);
+    color: #d97706;
+  }
+
+  .status-in-progress {
+    background: rgba(59, 130, 246, 0.1);
+    color: #2563eb;
+  }
+
+  .status-resolved {
+    background: rgba(16, 185, 129, 0.1);
+    color: #059669;
+  }
+
+  .priority-critical {
+    background: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
+  }
+
+  .priority-high {
+    background: rgba(245, 158, 11, 0.1);
+    color: #d97706;
+  }
+
+  .priority-medium {
+    background: rgba(59, 130, 246, 0.1);
+    color: #2563eb;
+  }
+
+  .priority-low {
+    background: rgba(16, 185, 129, 0.1);
+    color: #059669;
+  }
+
+  .action-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-md);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-tertiary);
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-right: 8px;
+  }
+
+  .action-btn:hover {
+    background: var(--border-color);
+    color: var(--text-primary);
+  }
+
+  .action-btn.view:hover {
+    color: var(--primary);
+    background: rgba(59, 130, 246, 0.1);
+  }
+
+  .action-btn.comment:hover {
+    color: var(--info);
+    background: rgba(59, 130, 246, 0.1);
+  }
+
+  /* Quick Actions Styles */
+  .quick-actions-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    z-index: 1000;
+    min-width: 180px;
+    display: none;
+    padding: 8px 0;
+  }
+
+  .quick-actions-dropdown.show {
+    display: block;
+  }
+
+  .quick-action-btn {
+    display: block;
+    width: 100%;
+    padding: 8px 16px;
+    border: none;
+    background: none;
+    text-align: left;
+    font-size: 14px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .quick-action-btn:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+  }
+
+  .quick-action-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .quick-action-btn i {
+    width: 16px;
+    margin-right: 8px;
+  }
+
+  .comment-count {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 18px;
+    height: 18px;
+    background: var(--info);
+    color: white;
+    border-radius: 50%;
+    font-size: 10px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Empty State */
+  .empty-state {
+    padding: 48px 24px;
+    text-align: center;
+  }
+
+  .empty-icon {
+    font-size: 48px;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+    opacity: 0.3;
+  }
+
+  .empty-state h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+  }
+
+  .empty-state p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin: 0;
+  }
+
+  /* Bottom Stats */
+  .metrics-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+  }
+
+  .metric-card {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+    padding: 24px;
+  }
+
+  .metric-card h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .progress-chart {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .chart-circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: conic-gradient(
+      var(--success) calc(var(--percentage) * 1%),
+      var(--bg-tertiary) calc(var(--percentage) * 1%) 100%
+    );
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  .chart-circle::before {
+    content: '';
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    background: var(--bg-secondary);
+    border-radius: 50%;
+  }
+
+  .chart-circle span {
+    position: relative;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .chart-legend {
+    flex: 1;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 12px;
+  }
+
+  .legend-text {
+    font-size: 14px;
+    color: var(--text-secondary);
+  }
+
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .metric-item {
+    text-align: center;
+  }
+
+  .metric-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .metric-label {
+    font-size: 14px;
+    color: var(--text-secondary);
+  }
+
+  /* Search Bar */
+  .search-container {
+    margin-bottom: 24px;
+    max-width: 500px;
+  }
+
+  .search-container .input-group {
+    display: flex;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .search-container input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 1px solid var(--border-color);
+    border-right: none;
+    font-size: 14px;
+    transition: all 0.2s ease;
+  }
+
+  .search-container input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  .search-container button {
+    padding: 0 16px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .search-container button:hover {
+    background: var(--primary-dark);
+  }
+
+  /* Alert */
+  .alert {
+    padding: 16px;
+    border-radius: var(--radius-md);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--success);
+    border-left: 4px solid var(--success);
+  }
+
+  .alert i {
+    font-size: 20px;
+  }
+
+  /* Responsive */
+  @media (max-width: 1024px) {
+    .sidebar {
+      width: 240px;
+    }
+    
+    .main-content {
+      margin-left: 240px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .sidebar {
+      transform: translateX(-100%);
+    }
+    
+    .sidebar.active {
+      transform: translateX(0);
+    }
+    
+    .main-content {
+      margin-left: 0;
+      padding: 24px;
+    }
+    
+    .stats-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+    
+    .metrics-container {
+      grid-template-columns: 1fr;
+    }
+    
+    .header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+    }
+  }
+
+  @media (max-width: 576px) {
+    .stats-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .filter-tabs {
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      flex: 1;
+      text-align: center;
+    }
+  }
+
+  /* Enhanced Charts Section */
+  .charts-section {
+    margin-top: 2rem;
+  }
+
+  .chart-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .chart-card {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-color);
+  }
+
+  .chart-card.full-width {
+    grid-column: 1 / -1;
+  }
+
+  .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .chart-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+  }
+
+  .chart-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .chart-btn {
+    padding: 0.25rem 0.75rem;
+    border: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .chart-btn.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+  }
+
+  .chart-btn:hover {
+    background: var(--primary-light);
+    color: white;
+  }
+
+  .chart-container {
+    position: relative;
+    height: 300px;
+  }
+
+  /* Real-time Updates */
+  .realtime-indicator {
+    text-align: center;
+  }
+
+  .status-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .status-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--danger);
+    animation: pulse 2s infinite;
+  }
+
+  .status-dot.active {
+    background: var(--success);
+  }
+
+  @keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+  }
+
+  .refresh-btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+  }
+
+  .refresh-btn:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+  }
+
+  .refresh-btn i {
+    margin-right: 0.5rem;
+  }
+
+  /* Enhanced Metrics */
+  .metrics-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .metric-card {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-color);
+  }
+
+  .metric-card h3 {
+    margin: 0 0 1rem 0;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+  }
+
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .metric-item {
+    text-align: center;
+    padding: 1rem;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+  }
+
+  .metric-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 0.25rem;
+  }
+
+  .metric-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  @media (max-width: 768px) {
+    .chart-row {
+      grid-template-columns: 1fr;
+    }
+    
+    .metrics-container {
+      grid-template-columns: 1fr;
+    }
+    
+    .metrics-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<div class="dashboard-container">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <a href="{{ url_for('admin_dashboard') }}" class="logo">
+        <span>Whistleblower</span>
+      </a>
+    </div>
+    
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-section-title">Navigation</div>
+        <ul>
+          <li class="nav-item">
+            <a href="{{ url_for('admin_dashboard') }}" class="nav-link active">
+              <i class="fas fa-tachometer-alt"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="{{ url_for('admin_reports') }}" class="nav-link">
+              <i class="fas fa-chart-bar"></i>
+              <span>Report Overview</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="{{ url_for('admin_report_log') }}" class="nav-link">
+              <i class="fas fa-book"></i>
+              <span>Report Log</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="{{ url_for('admin_settings') }}" class="nav-link">
+              <i class="fas fa-cog"></i>
+              <span>Admin Settings</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+      
+      <div class="nav-section">
+        <div class="nav-section-title">Actions</div>
+        <ul>
+          <li class="nav-item">
+            <a href="{{ url_for('index') }}" class="nav-link">
+              <i class="fas fa-external-link-alt"></i>
+              <span>View Public Site</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="{{ url_for('admin_logout') }}" class="nav-link logout">
+              <i class="fas fa-sign-out-alt"></i>
+              <span>Logout</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Search Bar -->
+    <div class="search-container">
+      <form method="get" action="{{ url_for('admin_dashboard') }}" class="input-group">
+        <input type="text" name="q" placeholder="Search reports by title, description, or code..." value="{{ request.args.get('q', '') }}">
+        <button type="submit"><i class="fas fa-search"></i> Search</button>
+      </form>
+    </div>
+    
+    <!-- Welcome Alert -->
+    <div class="alert">
+      <i class="fas fa-check-circle"></i>
+      <div>
+        <strong>Welcome to Admin Dashboard</strong> - You have {{ total_reports }} reports to review
+      </div>
+    </div>
+    
+    <!-- Header -->
+    <div class="header">
+      <div class="header-title">
+        <h1>Reports Dashboard</h1>
+        <p>Overview of whistleblower reports and system statistics</p>
+      </div>
+      
+      <div class="user-profile">
+        <div class="user-avatar">A</div>
+        <div class="user-info">
+          <h4>Admin User</h4>
+          <p>Administrator</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-header">
+          <div class="stat-title">Total Reports</div>
+          <div class="stat-icon reports">
+            <i class="fas fa-file-alt"></i>
+          </div>
+        </div>
+        <div class="stat-value" id="totalReports">{{ total_reports }}</div>
+        <div class="stat-change positive">
+          <i class="fas fa-arrow-up"></i>
+          <span>From last month</span>
+        </div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-header">
+          <div class="stat-title">Pending Reports</div>
+          <div class="stat-icon pending">
+            <i class="fas fa-clock"></i>
+          </div>
+        </div>
+        <div class="stat-value" id="pendingReports">{{ pending_reports }}</div>
+        <div class="stat-change negative">
+          <i class="fas fa-arrow-down"></i>
+          <span>From last week</span>
+        </div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-header">
+          <div class="stat-title">In Progress</div>
+          <div class="stat-icon in-progress">
+            <i class="fas fa-spinner"></i>
+          </div>
+        </div>
+        <div class="stat-value" id="inProgressReports">{{ in_progress_reports }}</div>
+        <div class="stat-change positive">
+          <i class="fas fa-arrow-up"></i>
+          <span>From yesterday</span>
+        </div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-header">
+          <div class="stat-title">Resolved</div>
+          <div class="stat-icon resolved">
+            <i class="fas fa-check-circle"></i>
+          </div>
+        </div>
+        <div class="stat-value" id="resolvedReports">{{ resolved_reports }}</div>
+        <div class="stat-change positive">
+          <i class="fas fa-arrow-up"></i>
+          <span>This week</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reports Table -->
+    <div class="reports-table-container">
+      <div class="table-header">
+        <h2><i class="fas fa-list"></i> Recent Reports</h2>
+        <div class="filter-tabs">
+          <button class="filter-btn active" data-filter="all">All</button>
+          <button class="filter-btn" data-filter="pending">Pending</button>
+          <button class="filter-btn" data-filter="in-progress">In Progress</button>
+          <button class="filter-btn" data-filter="resolved">Resolved</button>
+        </div>
+      </div>
+      
+      {% if reports %}
+      <div class="table-responsive">
+        <table class="reports-table">
+          <thead>
+            <tr>
+              <th>Tracking Code</th>
+              <th>Title</th>
+              <th>Category</th>
+              <th>Priority</th>
+              <th>Status</th>
+              <th>Submitted</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for report in reports %}
+            <tr class="report-row" data-status="{{ report[6]|lower|replace(' ', '-') }}" data-report-id="{{ report[0] }}">
+              <td>
+                <span class="tracking-code">{{ report[1][:2] }}****{{ report[1][-2:] }}</span>
+              </td>
+              <td>
+                <div class="report-title">{{ report[2] }}</div>
+                <p class="report-description">{{ report[3][:80] }}{% if report[3]|length > 80 %}...{% endif %}</p>
+              </td>
+              <td>
+                <span class="category-badge">{{ report[4] }}</span>
+              </td>
+              <td>
+                <span class="priority-badge priority-{{ report[5]|lower }}">
+                  {{ report[5] }}
+                </span>
+              </td>
+              <td>
+                <span class="status-badge status-{{ report[6]|lower|replace(' ', '-') }}">
+                  {{ report[6] }}
+                </span>
+              </td>
+              <td>
+                <span class="date-text">{{ report[7] }}</span>
+              </td>
+              <td>
+                <div style="position: relative; display: inline-block;">
+                  <a href="{{ url_for('admin_view_report', report_id=report[0]) }}" 
+                     class="action-btn view" title="View Report">
+                    <i class="fas fa-eye"></i>
+                  </a>
+                </div>
+                <div style="position: relative; display: inline-block;">
+                  <a href="{{ url_for('admin_view_report', report_id=report[0]) }}#comments" 
+                     class="action-btn comment" title="Comments">
+                    <i class="fas fa-comment"></i>
+                    {% if report[9]|int > 0 %}
+                    <span class="comment-count">{{ report[9] }}</span>
+                    {% endif %}
+                  </a>
+                </div>
+                <!-- Quick Actions -->
+                <div class="dropdown" style="display: inline-block;">
+                  <button class="action-btn quick-actions" title="Quick Actions" onclick="toggleQuickActions({{ report[0] }})">
+                    <i class="fas fa-bolt"></i>
+                  </button>
+                  <div class="quick-actions-dropdown" id="quick-actions-{{ report[0] }}">
+                    <button class="quick-action-btn" onclick="quickUpdateStatus({{ report[0] }}, 'Pending')" 
+                            {% if report[6] == 'Pending' %}disabled{% endif %}>
+                      <i class="fas fa-clock"></i> Mark Pending
+                    </button>
+                    <button class="quick-action-btn" onclick="quickUpdateStatus({{ report[0] }}, 'In Progress')"
+                            {% if report[6] == 'In Progress' %}disabled{% endif %}>
+                      <i class="fas fa-spinner"></i> Mark In Progress
+                    </button>
+                    <button class="quick-action-btn" onclick="quickUpdateStatus({{ report[0] }}, 'Resolved')"
+                            {% if report[6] == 'Resolved' %}disabled{% endif %}>
+                      <i class="fas fa-check"></i> Mark Resolved
+                    </button>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <i class="fas fa-inbox empty-icon"></i>
+        <h3>No reports found</h3>
+        <p>When reports are submitted, they will appear here.</p>
+      </div>
+      {% endif %}
+    </div>
+    
+    <!-- Enhanced Charts Section -->
+    <div class="charts-section">
+      <div class="chart-row">
+        <!-- Category Distribution Chart -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3><i class="fas fa-chart-pie"></i> Reports by Category</h3>
+            <div class="chart-actions">
+              <button class="chart-btn active" onclick="updateChartType('category', 'pie')">Pie</button>
+              <button class="chart-btn" onclick="updateChartType('category', 'bar')">Bar</button>
+            </div>
+          </div>
+          <div class="chart-container">
+            <canvas id="categoryChart" width="400" height="300"></canvas>
+          </div>
+        </div>
+        
+        <!-- Priority Distribution Chart -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3><i class="fas fa-exclamation-triangle"></i> Reports by Priority</h3>
+            <div class="chart-actions">
+              <button class="chart-btn active" onclick="updateChartType('priority', 'doughnut')">Doughnut</button>
+              <button class="chart-btn" onclick="updateChartType('priority', 'bar')">Bar</button>
+            </div>
+          </div>
+          <div class="chart-container">
+            <canvas id="priorityChart" width="400" height="300"></canvas>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Activity Timeline Chart -->
+      <div class="chart-card full-width">
+        <div class="chart-header">
+          <h3><i class="fas fa-chart-line"></i> Recent Activity (Last 7 Days)</h3>
+          <div class="chart-actions">
+            <button class="chart-btn active" onclick="updateChartType('activity', 'line')">Line</button>
+            <button class="chart-btn" onclick="updateChartType('activity', 'bar')">Bar</button>
+          </div>
+        </div>
+        <div class="chart-container">
+          <canvas id="activityChart" width="800" height="300"></canvas>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Enhanced Metrics Section -->
+    <div class="metrics-container">
+      <div class="metric-card">
+        <h3><i class="fas fa-chart-pie"></i> Resolution Rate</h3>
+        <div class="progress-chart">
+          <div class="chart-circle" style="--percentage: {{ (resolved_reports / total_reports * 100) if total_reports > 0 else 0 }};">
+            <span>{{ (resolved_reports / total_reports * 100)|round(1) if total_reports > 0 else 0 }}%</span>
+          </div>
+          <div class="chart-legend">
+            <div class="legend-item">
+              <span class="legend-color" style="background: var(--success);"></span>
+              <span class="legend-text">Resolved</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-color" style="background: var(--warning);"></span>
+              <span class="legend-text">Pending</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-color" style="background: var(--info);"></span>
+              <span class="legend-text">In Progress</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="metric-card">
+        <h3><i class="fas fa-stopwatch"></i> Response Metrics</h3>
+        <div class="metrics-grid">
+          <div class="metric-item">
+            <div class="metric-value" id="avgResponseTime">{{ avg_response_days }} days</div>
+            <div class="metric-label">Avg. Response Time</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-value" id="slaCompliance">{{ sla_percentage }}%</div>
+            <div class="metric-label">Within SLA</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-value" id="todayReports">{{ today_reports }}</div>
+            <div class="metric-label">Today's Reports</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-value" id="followUpReports">{{ follow_up_reports }}</div>
+            <div class="metric-label">Require Follow-up</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Real-time Updates Indicator -->
+      <div class="metric-card">
+        <h3><i class="fas fa-sync-alt"></i> Real-time Updates</h3>
+        <div class="realtime-indicator">
+          <div class="status-indicator">
+            <span class="status-dot active"></span>
+            <span class="status-text">Live</span>
+          </div>
+          <div class="last-update">
+            <small>Last updated: <span id="lastUpdateTime">Just now</span></small>
+          </div>
+          <button class="refresh-btn" onclick="refreshDashboard()">
+            <i class="fas fa-sync-alt"></i> Refresh
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+// Global chart instances
+let categoryChart, priorityChart, activityChart;
+let currentChartTypes = {
+    category: 'pie',
+    priority: 'doughnut',
+    activity: 'line'
+};
+
+// Color schemes for charts
+const chartColors = {
+    primary: ['#20b2aa', '#7fcdcd', '#008b8b', '#48cae4', '#023e8a', '#0077b6'],
+    secondary: ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3'],
+    success: ['#10b981', '#34d399', '#6ee7b7', '#a7f3d0', '#d1fae5'],
+    warning: ['#f59e0b', '#fbbf24', '#fcd34d', '#fde68a', '#fef3c7'],
+    danger: ['#ef4444', '#f87171', '#fca5a5', '#fecaca', '#fee2e2']
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize charts
+    initializeCharts();
+    
+    // Initialize real-time updates
+    initializeRealTimeUpdates();
+    
+    // Original functionality
+    initializeOriginalFeatures();
+});
+
+function initializeCharts() {
+    // Category Chart
+    const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+    const categoryLabels = {{ category_stats|map(attribute='0')|list|tojson if category_stats else []|tojson }};
+    const categoryData = {{ category_stats|map(attribute='1')|list|tojson if category_stats else []|tojson }};
+    
+    categoryChart = new Chart(categoryCtx, {
+        type: 'pie',
+        data: {
+            labels: categoryLabels,
+            datasets: [{
+                data: categoryData,
+                backgroundColor: chartColors.primary,
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((context.parsed / total) * 100).toFixed(1);
+                            return `${context.label}: ${context.parsed} (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Priority Chart
+    const priorityCtx = document.getElementById('priorityChart').getContext('2d');
+    const priorityLabels = {{ priority_stats|map(attribute='0')|list|tojson if priority_stats else []|tojson }};
+    const priorityData = {{ priority_stats|map(attribute='1')|list|tojson if priority_stats else []|tojson }};
+    
+    priorityChart = new Chart(priorityCtx, {
+        type: 'doughnut',
+        data: {
+            labels: priorityLabels,
+            datasets: [{
+                data: priorityData,
+                backgroundColor: chartColors.secondary,
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true
+                    }
+                }
+            }
+        }
+    });
+
+    // Activity Chart
+    const activityCtx = document.getElementById('activityChart').getContext('2d');
+    const activityData = {{ recent_activity|tojson if recent_activity else []|tojson }};
+    const labels = activityData.map(item => item[0]);
+    const data = activityData.map(item => item[1]);
+    
+    activityChart = new Chart(activityCtx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Reports',
+                data: data,
+                borderColor: '#20b2aa',
+                backgroundColor: 'rgba(32, 178, 170, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: '#20b2aa',
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 2,
+                pointRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+}
+
+function updateChartType(chartType, newType) {
+    // Update button states
+    const buttons = document.querySelectorAll(`[onclick*="${chartType}"]`);
+    buttons.forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    // Update chart
+    let chart;
+    switch(chartType) {
+        case 'category':
+            chart = categoryChart;
+            break;
+        case 'priority':
+            chart = priorityChart;
+            break;
+        case 'activity':
+            chart = activityChart;
+            break;
+    }
+    
+    if (chart) {
+        chart.config.type = newType;
+        chart.update();
+        currentChartTypes[chartType] = newType;
+    }
+}
+
+function initializeRealTimeUpdates() {
+    // Update dashboard data every 30 seconds
+    setInterval(refreshDashboardData, 30000);
+    
+    // Update last update time
+    updateLastUpdateTime();
+}
+
+function refreshDashboardData() {
+    fetch('{{ url_for("dashboard_data") }}')
+        .then(response => response.json())
+        .then(data => {
+            // Update statistics
+            updateStatistic('totalReports', data.total_reports);
+            updateStatistic('pendingReports', data.pending_reports);
+            updateStatistic('inProgressReports', data.in_progress_reports);
+            updateStatistic('resolvedReports', data.resolved_reports);
+            updateStatistic('todayReports', data.today_reports);
+            
+            // Update charts
+            updateCharts(data);
+            
+            // Update last update time
+            updateLastUpdateTime();
+            
+            // Show notification
+            showNotification('Dashboard updated successfully!', 'success');
+        })
+        .catch(error => {
+            console.error('Error updating dashboard:', error);
+            showNotification('Error updating dashboard', 'error');
+        });
+}
+
+function updateStatistic(elementId, newValue) {
+    const element = document.getElementById(elementId);
+    if (element) {
+        const currentValue = parseInt(element.textContent) || 0;
+        animateValue(element, currentValue, newValue, 1000);
+    }
+}
+
+function updateCharts(data) {
+    // Update category chart
+    if (categoryChart && data.category_stats) {
+        categoryChart.data.labels = data.category_stats.map(item => item[0]);
+        categoryChart.data.datasets[0].data = data.category_stats.map(item => item[1]);
+        categoryChart.update();
+    }
+    
+    // Update activity chart
+    if (activityChart && data.recent_activity) {
+        activityChart.data.labels = data.recent_activity.map(item => item[0]);
+        activityChart.data.datasets[0].data = data.recent_activity.map(item => item[1]);
+        activityChart.update();
+    }
+}
+
+function updateLastUpdateTime() {
+    const now = new Date();
+    const timeString = now.toLocaleTimeString();
+    document.getElementById('lastUpdateTime').textContent = timeString;
+}
+
+function refreshDashboard() {
+    refreshDashboardData();
+}
+
+function initializeOriginalFeatures() {
+    // Tab filtering functionality
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    const reportRows = document.querySelectorAll('.report-row');
+    
+    filterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const filter = this.getAttribute('data-filter');
+            
+            // Update active button
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Filter reports
+            reportRows.forEach(row => {
+                if (filter === 'all' || row.getAttribute('data-status') === filter) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    });
+    
+    // Animate counting numbers for stats
+    function animateValue(element, start, end, duration) {
+        let startTimestamp = null;
+        const step = (timestamp) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+            const current = Math.floor(progress * (end - start) + start);
+            element.innerHTML = current;
+            if (progress < 1) {
+                window.requestAnimationFrame(step);
+            }
+        };
+        window.requestAnimationFrame(step);
+    }
+    
+    // Initialize count animations
+    setTimeout(() => {
+        animateValue(document.getElementById('totalReports'), 0, {{ total_reports or 0 }}, 1500);
+        animateValue(document.getElementById('pendingReports'), 0, {{ pending_reports or 0 }}, 1800);
+        animateValue(document.getElementById('inProgressReports'), 0, {{ in_progress_reports or 0 }}, 2000);
+        animateValue(document.getElementById('resolvedReports'), 0, {{ resolved_reports or 0 }}, 2200);
+    }, 500);
+    
+    // Mobile menu toggle
+    const mobileMenuBtn = document.createElement('button');
+    mobileMenuBtn.className = 'mobile-menu-btn';
+    mobileMenuBtn.innerHTML = '<i class="fas fa-bars"></i>';
+    mobileMenuBtn.style.cssText = 'position: fixed; top: 16px; left: 16px; z-index: 1100; background: var(--primary); color: white; border: none; width: 40px; height: 40px; border-radius: var(--radius-md); display: none; align-items: center; justify-content: center;';
+    document.body.appendChild(mobileMenuBtn);
+    
+    mobileMenuBtn.addEventListener('click', function() {
+        document.querySelector('.sidebar').classList.toggle('active');
+    });
+    
+    // Show mobile menu button on small screens
+    function checkScreenSize() {
+        if (window.innerWidth <= 768) {
+            mobileMenuBtn.style.display = 'flex';
+        } else {
+            mobileMenuBtn.style.display = 'none';
+            document.querySelector('.sidebar').classList.remove('active');
+        }
+    }
+    
+    window.addEventListener('resize', checkScreenSize);
+    checkScreenSize();
+     
+    // Quick Actions Functions
+    window.toggleQuickActions = function(reportId) {
+        const dropdown = document.getElementById(`quick-actions-${reportId}`);
+        const allDropdowns = document.querySelectorAll('.quick-actions-dropdown');
+        
+        // Close all other dropdowns
+        allDropdowns.forEach(dd => {
+            if (dd !== dropdown) {
+                dd.classList.remove('show');
+            }
+        });
+        
+        // Toggle current dropdown
+        dropdown.classList.toggle('show');
+    }
+     
+    window.quickUpdateStatus = function(reportId, newStatus) {
+        fetch('{{ url_for("update_status") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `report_id=${reportId}&status=${newStatus}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update the status badge in the table
+                const statusCell = document.querySelector(`tr[data-report-id="${reportId}"] .status-badge`);
+                if (statusCell) {
+                    statusCell.textContent = newStatus;
+                    statusCell.className = `status-badge status-${newStatus.toLowerCase().replace(' ', '-')}`;
+                }
+                
+                // Close dropdown
+                document.getElementById(`quick-actions-${reportId}`).classList.remove('show');
+                
+                // Show success message
+                showNotification('Status updated successfully!', 'success');
+                
+                // Refresh dashboard data
+                refreshDashboardData();
+            } else {
+                showNotification('Error updating status. Please try again.', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('Error updating status. Please try again.', 'error');
+        });
+    }
+     
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', function(event) {
+        if (!event.target.closest('.dropdown')) {
+            document.querySelectorAll('.quick-actions-dropdown').forEach(dd => {
+                dd.classList.remove('show');
+            });
+        }
+    });
+     
+    // Notification function
+    function showNotification(message, type) {
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.textContent = message;
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: var(--radius-md);
+            color: white;
+            z-index: 10000;
+            font-weight: 500;
+            ${type === 'success' ? 'background: var(--success);' : 'background: var(--danger);'}
+            box-shadow: var(--shadow-lg);
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.style.opacity = '0';
+            notification.style.transform = 'translateY(-20px)';
+            setTimeout(() => {
+                notification.remove();
+            }, 300);
+        }, 3000);
+    }
+}
+</script>
+{% endblock %}

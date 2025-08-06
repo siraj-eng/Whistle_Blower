@@ -1,0 +1,30 @@
+# Ignore virtual environments
+venv/
+.env/
+.env
+__pycache__/
+*.pyc
+
+# Ignore logs and configs
+*.log
+*.ini
+*.cfg
+*.toml
+*.db
+
+# Ignore notebooks (if not relevant)
+*.ipynb
+
+# Ignore compiled or temporary files
+*.so
+*.zip
+*.tar.gz
+*.egg-info/
+dist/
+build/
+
+# Ignore large data files
+*.csv
+*.xlsx
+*.json
+*.pickle
