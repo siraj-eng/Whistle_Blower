@@ -541,20 +541,34 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '© OpenStreetMap contributors'
 }).addTo(map);
 
-let hasMarkers = false;
-locationData.forEach(loc => {
-  // Only show markers with valid lat/lng in Kenya (approximate bounding box)
-  if(loc.lat && loc.lng && loc.lat > -5 && loc.lat < 5 && loc.lng > 33 && loc.lng < 42) {
-    L.marker([loc.lat, loc.lng]).addTo(map)
-      .bindPopup(`<b>${loc.category}</b><br>${loc.location}`);
-    hasMarkers = true;
-  }
-});
+let markers = [];
 
-if (!hasMarkers) {
-  document.getElementById('mapMessage').style.display = 'block';
-  document.getElementById('map').style.opacity = 0.5;
+function updateMapMarkers() {
+  fetch('/admin/api/locations')
+    .then(response => response.json())
+    .then(data => {
+      // Remove old markers
+      markers.forEach(marker => map.removeLayer(marker));
+      markers = [];
+      let hasMarkers = false;
+      data.locations.forEach(loc => {
+        if(loc.lat && loc.lng && loc.lat > -5 && loc.lat < 5 && loc.lng > 33 && loc.lng < 42) {
+          const marker = L.marker([loc.lat, loc.lng]).addTo(map)
+            .bindPopup(`<b>${loc.category}</b><br>${loc.location}`);
+          markers.push(marker);
+          hasMarkers = true;
+        }
+      });
+      document.getElementById('mapMessage').style.display = hasMarkers ? 'none' : 'block';
+      document.getElementById('map').style.opacity = hasMarkers ? 1 : 0.5;
+    });
 }
+
+// Initial load
+updateMapMarkers();
+
+// Refresh every 30 seconds
+setInterval(updateMapMarkers, 30000);
 
 window.addEventListener('resize', function() {
   map.invalidateSize();

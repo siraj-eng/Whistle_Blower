@@ -29,7 +29,7 @@
                       </form>
                     </div>
 
-                    <form method="POST">
+                    <form method="POST" enctype="multipart/form-data">
                         <!-- Section: About the Incident -->
                         <h5 class="mb-3 mt-2"><i class="fas fa-info-circle me-2"></i>About the Incident</h5>
                         <div class="mb-4">
@@ -131,6 +131,19 @@
                             <div class="form-text">
                                 Be as detailed as possible while maintaining anonymity. Include relevant dates, locations, and any supporting information.
                             </div>
+                        </div>
+                        
+                        <!-- Section: Attachment (Optional) -->
+                        <h5 class="mb-3 mt-4"><i class="fas fa-paperclip me-2"></i>Attachment (Optional)</h5>
+                        <div class="mb-4">
+                            <label for="attachment" class="form-label fw-bold">
+                                <i class="fas fa-image me-2"></i>Image Attachment
+                                <span data-bs-toggle="tooltip" title="Optionally attach an image that supports your report (e.g., photos of unsafe conditions).">
+                                    <i class="fas fa-question-circle text-muted"></i>
+                                </span>
+                            </label>
+                            <input type="file" class="form-control" id="attachment" name="attachment" accept="image/*">
+                            <div class="form-text">Only image files are allowed (JPG, PNG, GIF). This is completely optional.</div>
                         </div>
                         
                         <!-- Section: Urgency -->

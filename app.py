@@ -1,14 +1,23 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify, send_from_directory, abort
 import sqlite3
 import secrets
 import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 import os
 from collections import Counter
-import json
+import uuid
+import requests
 
 app = Flask(__name__)
 app.secret_key = secrets.token_hex(16)
+
+# Configure upload folder
+UPLOAD_FOLDER = 'uploads'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'pdf', 'doc', 'docx', 'txt'}
+MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # Custom filter for newline to <br> conversion
 @app.template_filter('nl2br')
@@ -16,6 +25,16 @@ def nl2br_filter(text):
     if text is None:
         return ""
     return text.replace('\n', '<br>')
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def validate_file_size(file):
+    file.seek(0, os.SEEK_END)
+    file_size = file.tell()
+    file.seek(0)
+    return file_size <= MAX_FILE_SIZE
 
 # Database initialization and migration
 def init_db():
@@ -36,7 +55,9 @@ def init_db():
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             date_of_incident TEXT NOT NULL,
             location TEXT NOT NULL,
-            department TEXT NOT NULL
+            department TEXT NOT NULL,
+            attachment_filename TEXT,
+            file_size INTEGER
         )
     ''')
     
@@ -49,6 +70,14 @@ def init_db():
         cursor.execute('ALTER TABLE reports ADD COLUMN location TEXT NOT NULL DEFAULT ""')
     if 'department' not in columns:
         cursor.execute('ALTER TABLE reports ADD COLUMN department TEXT NOT NULL DEFAULT ""')
+    if 'attachment_filename' not in columns:
+        cursor.execute('ALTER TABLE reports ADD COLUMN attachment_filename TEXT')
+    if 'file_size' not in columns:
+        cursor.execute('ALTER TABLE reports ADD COLUMN file_size INTEGER DEFAULT 0')
+    if 'lat' not in columns:
+        cursor.execute('ALTER TABLE reports ADD COLUMN lat REAL')
+    if 'lng' not in columns:
+        cursor.execute('ALTER TABLE reports ADD COLUMN lng REAL')
     
     # Create admin table
     cursor.execute('''
@@ -108,38 +137,103 @@ def submit_report():
         date_of_incident = request.form.get('date_of_incident')
         location = request.form.get('location')
         department = request.form.get('department')
-        # Only require that all fields are not empty (no minimum length for description or title)
+        
         if not all([title, description, category, priority, date_of_incident, location, department]):
             flash('All fields are required!', 'error')
             return render_template('submit_report.html', categories=categories, lang=lang)
+        
         conn = sqlite3.connect('whistleblower.db')
         cursor = conn.cursor()
+        
         # Check for duplicate report
         cursor.execute('''
             SELECT tracking_code FROM reports WHERE title = ? AND description = ? AND date_of_incident = ? AND location = ? AND department = ?
         ''', (title, description, date_of_incident, location, department))
         existing = cursor.fetchone()
+        
         if existing:
             conn.close()
             flash('A report with the same details already exists. Please check your tracking code or contact admin for follow-up.', 'error')
             return render_template('submit_report.html', categories=categories, lang=lang)
+        
+        # Handle file upload
+        attachment_filename = None
+        file_size = 0
+        if 'attachment' in request.files:
+            file = request.files['attachment']
+            if file and file.filename != '':
+                if not allowed_file(file.filename):
+                    conn.close()
+                    flash(f'Invalid file type. Allowed types are: {", ".join(ALLOWED_EXTENSIONS)}', 'error')
+                    return render_template('submit_report.html', categories=categories, lang=lang)
+                
+                if not validate_file_size(file):
+                    conn.close()
+                    flash('File size exceeds maximum allowed size (5MB)', 'error')
+                    return render_template('submit_report.html', categories=categories, lang=lang)
+                
+                # Generate secure unique filename
+                ext = secure_filename(file.filename).rsplit('.', 1)[1].lower()
+                attachment_filename = f"{uuid.uuid4()}.{ext}"
+                file_path = os.path.join(app.config['UPLOAD_FOLDER'], attachment_filename)
+                file.save(file_path)
+                file_size = os.path.getsize(file_path)
+        
         tracking_code = generate_tracking_code()
         try:
+            # Dummy coordinates for Kenya (replace with real geocoding later)
+            lat, lng = geocode_location(location)
+            
             cursor.execute('''
-                INSERT INTO reports (tracking_code, title, description, category, priority, status, date_of_incident, location, department)
-                VALUES (?, ?, ?, ?, ?, 'Pending', ?, ?, ?)
-            ''', (tracking_code, title, description, category, priority, date_of_incident, location, department))
+                INSERT INTO reports (
+                    tracking_code, title, description, category, priority, 
+                    status, date_of_incident, location, department, 
+                    attachment_filename, file_size, lat, lng
+                ) VALUES (?, ?, ?, ?, ?, 'Pending', ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                tracking_code, title, description, category, priority,
+                date_of_incident, location, department,
+                attachment_filename, file_size, lat, lng
+            ))
+            
             # Get the report ID and add initial status comment
             report_id = cursor.lastrowid
             cursor.execute('INSERT INTO comments (report_id, comment, is_admin) VALUES (?, ?, FALSE)', 
                           (report_id, "Status changed from None to Pending"))
             conn.commit()
-            return render_template('submit_success.html', tracking_code=tracking_code)
-        except sqlite3.IntegrityError:
-            flash('Error generating tracking code. Please try again.', 'error')
+            
+            return render_template('submit_success.html', 
+                                tracking_code=tracking_code,
+                                attachment_filename=attachment_filename)
+        except sqlite3.IntegrityError as e:
+            flash(f'Error submitting report: {str(e)}', 'error')
+            # Clean up uploaded file if there was an error
+            if attachment_filename:
+                try:
+                    os.remove(os.path.join(app.config['UPLOAD_FOLDER'], attachment_filename))
+                except OSError:
+                    pass
         finally:
             conn.close()
+    
     return render_template('submit_report.html', categories=categories, lang=lang)
+
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    # Security check to prevent directory traversal
+    if '..' in filename or filename.startswith('/'):
+        abort(404)
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
+@app.route('/admin/attachment/<filename>')
+def serve_attachment(filename):
+    """Serve attachment files for admin view - alias for uploaded_file with admin check"""
+    if 'admin_id' not in session:
+        abort(403)
+    # Security check to prevent directory traversal
+    if '..' in filename or filename.startswith('/'):
+        abort(404)
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 @app.route('/track_report', methods=['GET', 'POST'])
 def track_report():
@@ -194,7 +288,7 @@ def add_user_comment():
         conn.close()
         return jsonify({'error': 'Invalid tracking code.'}), 404
     report_id = report[0]
-    # Prevent duplicate user comments (last comment by user must not be the same)
+    # Prevent duplicate user comments
     cursor.execute('''SELECT comment FROM comments WHERE report_id = ? AND is_admin = 0 ORDER BY created_at DESC LIMIT 1''', (report_id,))
     last_comment = cursor.fetchone()
     if last_comment and last_comment[0].strip() == comment.strip():
@@ -256,7 +350,7 @@ def admin_dashboard():
         ''')
     reports = cursor.fetchall()
     
-    # Enhanced statistics
+    # Statistics
     cursor.execute('SELECT COUNT(*) FROM reports')
     total_reports = cursor.fetchone()[0]
     
@@ -277,7 +371,7 @@ def admin_dashboard():
     cursor.execute('SELECT priority, COUNT(*) FROM reports GROUP BY priority ORDER BY COUNT(*) DESC')
     priority_stats = cursor.fetchall()
     
-    # Recent activity (last 7 days)
+    # Recent activity
     cursor.execute('''
         SELECT DATE(created_at) as date, COUNT(*) as count 
         FROM reports 
@@ -300,7 +394,7 @@ def admin_dashboard():
     cursor.execute('SELECT COUNT(*) FROM reports WHERE DATE(created_at) = DATE("now")')
     today_reports = cursor.fetchone()[0]
     
-    # Reports requiring follow-up (pending for more than 3 days)
+    # Reports requiring follow-up
     cursor.execute('''
         SELECT COUNT(*) FROM reports 
         WHERE status = "Pending" 
@@ -308,7 +402,7 @@ def admin_dashboard():
     ''')
     follow_up_reports = cursor.fetchone()[0]
     
-    # SLA compliance (resolved within 7 days)
+    # SLA compliance
     cursor.execute('''
         SELECT COUNT(*) FROM reports 
         WHERE status = "Resolved" 
@@ -438,7 +532,6 @@ def admin_reports():
         return redirect(url_for('admin_login'))
     conn = sqlite3.connect('whistleblower.db')
     cursor = conn.cursor()
-    # Get all categories and counts
     cursor.execute('SELECT category FROM reports')
     categories = [row[0] for row in cursor.fetchall()]
     category_counts = Counter(categories)
@@ -446,16 +539,14 @@ def admin_reports():
         'labels': list(category_counts.keys()),
         'counts': list(category_counts.values())
     }
-    # Get all locations and categories
     cursor.execute('SELECT location, category FROM reports')
     locations = cursor.fetchall()
-    # Stub geocoding: just return empty lat/lng for now
     location_data = []
     for loc, cat in locations:
         location_data.append({
             'location': loc,
             'category': cat,
-            'lat': None,  # To be filled by geocoding
+            'lat': None,
             'lng': None
         })
     conn.close()
@@ -465,7 +556,6 @@ def admin_reports():
 def admin_report_log():
     if 'admin_id' not in session:
         return redirect(url_for('admin_login'))
-    # Placeholder: you can create a template later
     return '<h1>Report Log (Coming Soon)</h1><p>This page will show a chronological log of all reports and actions.</p>'
 
 @app.route('/admin/api/dashboard-data')
@@ -476,7 +566,6 @@ def dashboard_data():
     conn = sqlite3.connect('whistleblower.db')
     cursor = conn.cursor()
     
-    # Real-time statistics
     cursor.execute('SELECT COUNT(*) FROM reports')
     total_reports = cursor.fetchone()[0]
     
@@ -489,15 +578,12 @@ def dashboard_data():
     cursor.execute('SELECT COUNT(*) FROM reports WHERE status = "Resolved"')
     resolved_reports = cursor.fetchone()[0]
     
-    # Today's reports
     cursor.execute('SELECT COUNT(*) FROM reports WHERE DATE(created_at) = DATE("now")')
     today_reports = cursor.fetchone()[0]
     
-    # Category breakdown
     cursor.execute('SELECT category, COUNT(*) FROM reports GROUP BY category ORDER BY COUNT(*) DESC')
     category_stats = cursor.fetchall()
     
-    # Recent activity (last 7 days)
     cursor.execute('''
         SELECT DATE(created_at) as date, COUNT(*) as count 
         FROM reports 
@@ -507,7 +593,6 @@ def dashboard_data():
     ''')
     recent_activity = cursor.fetchall()
     
-    # Latest reports
     cursor.execute('''
         SELECT r.*, COUNT(c.id) as comment_count
         FROM reports r
@@ -530,6 +615,20 @@ def dashboard_data():
         'recent_activity': recent_activity,
         'latest_reports': latest_reports
     })
+
+@app.route('/admin/api/locations')
+def admin_locations():
+    if 'admin_id' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    conn = sqlite3.connect('whistleblower.db')
+    cursor = conn.cursor()
+    cursor.execute('SELECT location, category, lat, lng FROM reports')
+    locations = [
+        {'location': row[0], 'category': row[1], 'lat': row[2], 'lng': row[3]}
+        for row in cursor.fetchall()
+    ]
+    conn.close()
+    return jsonify({'locations': locations})
 
 @app.route('/setup_admin', methods=['GET', 'POST'])
 def setup_admin():
@@ -590,8 +689,7 @@ def reset_admin_password():
         conn = sqlite3.connect('whistleblower.db')
         cursor = conn.cursor()
         
-        # Update the admin password (assuming there's only one admin)
-        cursor.execute('UPDATE admins SET password_hash = ? WHERE id = 1')
+        cursor.execute('UPDATE admins SET password_hash = ? WHERE id = 1', (password_hash,))
         conn.commit()
         conn.close()
         
@@ -600,6 +698,26 @@ def reset_admin_password():
     
     return render_template('reset_admin_password.html')
 
+def geocode_location(location):
+    """Geocode a location string using Nominatim (OpenStreetMap)"""
+    try:
+        url = "https://nominatim.openstreetmap.org/search"
+        params = {
+            "q": location + ", Kenya",
+            "format": "json",
+            "limit": 1
+        }
+        headers = {"User-Agent": "WhistleBlowerApp/1.0"}
+        response = requests.get(url, params=params, headers=headers, timeout=5)
+        data = response.json()
+        if data and len(data) > 0:
+            lat = float(data[0]['lat'])
+            lng = float(data[0]['lon'])
+            return lat, lng
+    except Exception as e:
+        print(f"Geocoding error: {e}")
+    return None, None
+
 if __name__ == '__main__':
     init_db()
-    app.run(debug=True) 
+    app.run(debug=True)

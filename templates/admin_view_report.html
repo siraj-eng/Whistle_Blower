@@ -220,7 +220,7 @@
   
   .empty-state {
     text-align: center;
-    padding: 2rem;
+    padding: 2rem;   
     background: #f1f5f9;
     border-radius: 8px;
   }
@@ -235,6 +235,92 @@
   .empty-text {
     color: #334155;
     font-size: 0.95rem;
+  }
+
+  /* Enhanced Attachment Styles */
+  .attachment-info {
+    background: #f8fafc;
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    transition: all 0.2s ease;
+  }
+
+  .attachment-info:hover {
+    border-color: #2dd4bf;
+    box-shadow: 0 2px 8px rgba(45, 212, 191, 0.1);
+  }
+
+  .attachment-filename {
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    color: #334155;
+    font-weight: 500;
+  }
+
+  .attachment-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .attachment-actions .btn {
+    font-size: 0.85rem;
+    padding: 0.375rem 0.75rem;
+    transition: all 0.2s ease;
+  }
+
+  .attachment-actions .btn:hover {
+    transform: translateY(-1px);
+  }
+  
+  /* Timeline Styles */
+  .timeline {
+    position: relative;
+    padding-left: 20px;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #e2e8f0;
+  }
+
+  .timeline-item {
+    position: relative;
+    margin-bottom: 1.5rem;
+  }
+
+  .timeline-marker {
+    position: absolute;
+    left: -20px;
+    top: 4px;
+    width: 12px;
+    height: 12px;
+    background: #2dd4bf;
+    border-radius: 50%;
+    border: 2px solid white;
+    box-shadow: 0 0 0 2px #e2e8f0;
+  }
+
+  .timeline-content {
+    padding-left: 10px;
+  }
+
+  .timeline-title {
+    font-weight: 600;
+    color: #0f172a;
+    font-size: 0.9rem;
+  }
+
+  .timeline-date {
+    font-size: 0.8rem;
+    color: #64748b;
+    margin-top: 2px;
   }
   
   /* Mobile Responsive */
@@ -261,6 +347,16 @@
     
     .report-card-header {
       padding: 1rem 1.25rem;
+    }
+  }
+
+  @media (max-width: 576px) {
+    .attachment-actions {
+      flex-direction: column;
+    }
+    
+    .attachment-actions .btn {
+      width: 100%;
     }
   }
 </style>
@@ -334,6 +430,32 @@
               {{ report[3]|nl2br|safe }}
             </div>
           </div>
+          
+          <!-- Enhanced Attachment Section -->
+          {% if report[12] %}
+          <div class="metadata-item">
+            <span class="metadata-label">Attachment</span>
+            <div class="attachment-info">
+              <div class="d-flex align-items-center gap-2 mb-2">
+                <i class="fas fa-paperclip text-primary"></i>
+                <span class="attachment-filename">{{ report[12] }}</span>
+                {% if report[13] %}
+                  <small class="text-muted">({{ "%.1f"|format(report[13]/1024) }} KB)</small>
+                {% endif %}
+              </div>
+              <div class="attachment-actions">
+                <a href="{{ url_for('serve_attachment', filename=report[12]) }}" target="_blank" 
+                   class="btn btn-outline-primary btn-sm me-2">
+                  <i class="fas fa-eye me-1"></i>View
+                </a>
+                <a href="{{ url_for('serve_attachment', filename=report[12]) }}" download 
+                   class="btn btn-outline-secondary btn-sm">
+                  <i class="fas fa-download me-1"></i>Download
+                </a>
+              </div>
+            </div>
+          </div>
+          {% endif %}
         </div>
       </div>
       
@@ -466,53 +588,4 @@
   </div>
 </div>
 
-<style>
-.timeline {
-  position: relative;
-  padding-left: 20px;
-}
-
-.timeline::before {
-  content: '';
-  position: absolute;
-  left: 6px;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: #e2e8f0;
-}
-
-.timeline-item {
-  position: relative;
-  margin-bottom: 1.5rem;
-}
-
-.timeline-marker {
-  position: absolute;
-  left: -20px;
-  top: 4px;
-  width: 12px;
-  height: 12px;
-  background: #2dd4bf;
-  border-radius: 50%;
-  border: 2px solid white;
-  box-shadow: 0 0 0 2px #e2e8f0;
-}
-
-.timeline-content {
-  padding-left: 10px;
-}
-
-.timeline-title {
-  font-weight: 600;
-  color: #0f172a;
-  font-size: 0.9rem;
-}
-
-.timeline-date {
-  font-size: 0.8rem;
-  color: #64748b;
-  margin-top: 2px;
-}
-</style>
 {% endblock %}
