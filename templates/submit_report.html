@@ -264,5 +264,20 @@ document.addEventListener('DOMContentLoaded', function() {
       document.getElementById('langForm').submit();
     });
 });
+
+function setLanguage(lang) {
+    // Change all text to selected language
+    document.querySelectorAll('[data-en]').forEach(el => {
+        el.style.display = lang === 'en' ? '' : 'none';
+    });
+    document.querySelectorAll('[data-sw]').forEach(el => {
+        el.style.display = lang === 'sw' ? '' : 'none';
+    });
+
+    // Change input placeholders if needed
+    document.getElementById('title').placeholder = lang === 'en' ? 'Report Title' : 'Kichwa cha Ripoti';
+    document.getElementById('description').placeholder = lang === 'en' ? 'Describe the incident...' : 'Eleza tukio...';
+    document.getElementById('area_of_incident').placeholder = lang === 'en' ? 'Area of Incident' : 'Eneo la Tukio';
+}
 </script>
 {% endblock %}
