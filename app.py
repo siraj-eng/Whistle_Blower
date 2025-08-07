@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify, send_from_directory, abort
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify, send_from_directory, abort, make_response
 import sqlite3
 import secrets
 import datetime
@@ -8,6 +8,8 @@ import os
 from collections import Counter
 import uuid
 import requests
+import csv
+import io
 
 app = Flask(__name__)
 app.secret_key = secrets.token_hex(16)
@@ -713,6 +715,61 @@ def save_admin_comment(report_id, comment):
     )
     conn.commit()
     conn.close()
+
+@app.route('/admin/export_reports', methods=['GET'])
+def export_reports():
+    if 'admin_id' not in session:
+        return redirect(url_for('admin_login'))
+    
+    conn = sqlite3.connect('whistleblower.db')
+    cursor = conn.cursor()
+    
+    cursor.execute('SELECT * FROM reports')
+    reports = cursor.fetchall()
+    
+    conn.close()
+    
+    output = io.StringIO()
+    writer = csv.writer(output)
+    
+    writer.writerow([
+        'Tracking Code',
+        'Title',
+        'Description',
+        'Category',
+        'Priority',
+        'Status',
+        'Date of Incident',
+        'Location',
+        'Department',
+        'Attachment Filename',
+        'File Size',
+        'Latitude',
+        'Longitude'
+    ])
+    
+    for report in reports:
+        writer.writerow([
+            report[1],
+            report[2],
+            report[3],
+            report[4],
+            report[5],
+            report[6],
+            report[7],
+            report[8],
+            report[9],
+            report[10],
+            report[11],
+            report[12],
+            report[13]
+        ])
+    
+    response = make_response(output.getvalue())
+    response.headers['Content-Disposition'] = 'attachment; filename=reports.csv'
+    response.headers['Content-Type'] = 'text/csv'
+    
+    return response
 
 if __name__ == '__main__':
     init_db()

@@ -671,7 +671,8 @@ document.querySelectorAll('.btn-settings').forEach(btn => {
     if (action === 'backup') {
       alert('Backup functionality will be implemented in future updates.');
     } else if (action === 'export') {
-      alert('Export functionality will be implemented in future updates.');
+      // Export all reports as CSV
+      window.location.href = '/admin/export_reports';
     } else if (action === 'clear') {
       if (confirm('Are you sure you want to clear old data? This action cannot be undone.')) {
         alert('Data clearing functionality will be implemented in future updates.');
