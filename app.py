@@ -492,27 +492,12 @@ def update_status():
 
 @app.route('/admin/add_comment', methods=['POST'])
 def add_admin_comment():
-    if 'admin_id' not in session:
-        return jsonify({'error': 'Unauthorized'}), 401
-    
-    report_id = request.form.get('report_id')
-    comment = request.form.get('comment')
-    
-    if not comment:
-        return jsonify({'error': 'Comment is required'}), 400
-    
-    conn = sqlite3.connect('whistleblower.db')
-    cursor = conn.cursor()
-    
-    cursor.execute('''
-        INSERT INTO comments (report_id, comment, is_admin)
-        VALUES (?, ?, TRUE)
-    ''', (report_id, comment))
-    
-    conn.commit()
-    conn.close()
-    
-    return jsonify({'success': True})
+    report_id = request.form['report_id']
+    comment = request.form['comment']
+    # Save the comment to the database (implement your logic here)
+    save_admin_comment(report_id, comment)
+    # Redirect back to the report view page
+    return redirect(url_for('admin_view_report', report_id=report_id))
 
 @app.route('/admin/logout')
 def admin_logout():
@@ -717,6 +702,17 @@ def geocode_location(location):
     except Exception as e:
         print(f"Geocoding error: {e}")
     return None, None
+
+def save_admin_comment(report_id, comment):
+    """Save an admin comment to the database."""
+    conn = sqlite3.connect('whistleblower.db')
+    cursor = conn.cursor()
+    cursor.execute(
+        'INSERT INTO comments (report_id, comment, is_admin) VALUES (?, ?, TRUE)',
+        (report_id, comment)
+    )
+    conn.commit()
+    conn.close()
 
 if __name__ == '__main__':
     init_db()
